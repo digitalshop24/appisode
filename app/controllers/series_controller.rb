@@ -1,6 +1,6 @@
 class SeriesController < ApplicationController
   def create
-    Tmdb::Api.key(ENV['api_key'])
+    Tmdb::Api.key(api_key: '15e545fda3d4598527fac7245a459571')
     current_film = Tmdb::TV.find(params[:name]).first
     if current_film
       user_id = current_user.id
