@@ -1,2 +1,31 @@
-<h1>Home#show</h1>
-<p>Find me in app/views/home/show.html.erb</p>
+<h1>Series</h1>
+<%= form_tag("/series", method: "post" ) do %>
+    <h3>Поиск</h3>
+    <div class="form-group">
+
+      <%= text_area_tag(:name, "", id: "note_author", class: "form-control", rows: "3") %>
+      <%= submit_tag("Искать", class: "btn btn-default") %>
+    </div>
+<%end%>
+<% if @serial != nil %>
+    <table>
+      <tr>
+        <td><%= image_tag("http://image.tmdb.org/t/p/w500#{@serial.logo}") %></td>
+        <td>
+          <table>
+            <tr>
+              <td><h3><%= @serial.title %></h3></td>
+            </tr>
+            <tr>
+              <td><p>выход новой серии</p></td>
+            </tr>
+            <tr>
+              <td><p><%= @serial.date %></p></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    </div>
+<%end%>
