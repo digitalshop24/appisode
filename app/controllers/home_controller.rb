@@ -1,7 +1,6 @@
 class HomeController < ApplicationController
-  require 'pry'
+
   def show
-    binding.pry
     if current_user
       if session[:flag] == "unsuccess"
         flash[:notice] = "No data"

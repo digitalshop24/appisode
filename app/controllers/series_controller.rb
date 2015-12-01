@@ -1,5 +1,4 @@
 class SeriesController < ApplicationController
-  require 'pry'
   def create
     Tmdb::Api.key(ENV['api_key'])
     current_film = Tmdb::TV.find(params[:name]).first
