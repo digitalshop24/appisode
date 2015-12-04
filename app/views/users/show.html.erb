@@ -1,0 +1,16 @@
+<p id="notice"><%= notice %></p>
+
+<%= link_to 'Edit', edit_user_path(@user) %> |
+<%= link_to 'Back', root_path %>
+<div><%= @user.name %></div>
+<div><%= @user.email %></div>
+<div><%= @user.number %></div>
+<div><% if @user.subscription %>
+      вы подписаны
+  <%else%>
+      вы не подписаны
+  <%end%>
+</div>
+
+
+

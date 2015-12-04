@@ -11,6 +11,7 @@
       <% if current_user %>
         Signed in as <strong><%= current_user.name %></strong>!
         <%= link_to "Sign out", signout_path, id: "sign_out" %>
+        <%= link_to "Настройки", "/users/#{current_user.id}", id: "sign_out" %>
           <div>
 
             <%= yield %>

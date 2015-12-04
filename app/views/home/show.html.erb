@@ -10,20 +10,51 @@
 <% if @serial != nil %>
     <table>
       <tr>
-        <td><%= image_tag("http://image.tmdb.org/t/p/w500#{@serial.logo}") %></td>
         <td>
           <table>
             <tr>
               <td><h3><%= @serial.title %></h3></td>
             </tr>
             <tr>
-              <td><p>выход новой серии</p></td>
+              <td><h4>выход сезона целиком</h4></td>
             </tr>
             <tr>
-              <td><p><%= @serial.date %></p></td>
+              <td><p><%= @serial.full_date %></p></td>
             </tr>
+            <tr>
+              <td><h4>Выход ближайшей новой серии</h4></td>
+            </tr>
+            <tr>
+              <% if @serial.date %>
+                  <td><p><%= @serial.date %></p></td>
+              <%else%>
+                  <td><p>Сезон закончился</p></td>
+              <%end%>
+            </tr>
+            <tr>
+              <td><h4>Выход второй новой серии серии</h4></td>
+            </tr>
+            <tr>
+              <% if @serial.second %>
+                  <td><p><%= @serial.second %></p></td>
+              <%else%>
+                  <td><p>Сезон закончился</p></td>
+              <%end%>
+            </tr>
+            <tr>
+              <td><h4>Выход третьей новой серии</h4></td>
+            </tr>
+            <tr>
+              <% if @serial.third %>
+                  <td><p><%= @serial.third %></p></td>
+              <%else%>
+                  <td><p>Сезон закончился</p></td>
+              <%end%>
+            </tr>
+
           </table>
         </td>
+        <td><%= image_tag("http://image.tmdb.org/t/p/w500#{@serial.logo}", size: "370x520") %></td>
       </tr>
     </table>
 
