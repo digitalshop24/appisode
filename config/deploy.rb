@@ -53,11 +53,11 @@ namespace :deploy do
   desc 'Setup'
   task :setup do
     on roles(:all) do
-      execute "mkdir  #{shared_path}/config/"
-      execute "mkdir  /var/www/apps/#{application}/run/"
-      execute "mkdir  /var/www/apps/#{application}/log/"
-      execute "mkdir  /var/www/apps/#{application}/socket/"
-      execute "mkdir #{shared_path}/system"
+      #execute "mkdir  #{shared_path}/config/"
+      #execute "mkdir  /var/www/apps/#{application}/run/"
+      #execute "mkdir  /var/www/apps/#{application}/log/"
+      #execute "mkdir  /var/www/apps/#{application}/socket/"
+      #execute "mkdir #{shared_path}/system"
 
       upload!('config/application.yml', "#{shared_path}/config/application.yml")
       within release_path do
