@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.0.1'
+gem 'rails', '4.2.3'
+gem 'rake', '10.4.2'
 
 gem 'omniauth-google-oauth2', '~> 0.2.1'
 
@@ -19,6 +20,8 @@ gem 'coffee-rails', '~> 4.0.0'
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
+gem 'bootstrap-sass', '~> 3.2.0'
+gem 'autoprefixer-rails'
 
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 gem 'turbolinks'
@@ -29,9 +32,22 @@ gem 'figaro', '~> 1.1', '>= 1.1.1'
 gem 'themoviedb'
 gem 'pg'
 gem 'pry'
+gem 'sendgrid'
+gem 'whenever', :require => false
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false
+end
+
+group :production do
+  gem 'unicorn', '~> 4.9'
+end
+
+group :development do
+  gem 'capistrano', '~> 3.4.0'
+  gem 'capistrano-rails'
+  gem 'capistrano-bundler'
+  gem 'capistrano-rvm'
 end
 
 # Use ActiveModel has_secure_password

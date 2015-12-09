@@ -9,4 +9,5 @@ GoogleAuthExample::Application.routes.draw do
   root to: "home#show"
   resource :series
   resources :users
+  resources :subscriptions
 end

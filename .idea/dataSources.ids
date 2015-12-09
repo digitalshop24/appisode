@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="dataSourceStorage">
+  <data-source source="LOCAL" name="Rails GoogleAuthExampleApp: default" uuid="485c78e2-89b0-4d68-a54e-390ab1320b74">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+  <data-source source="LOCAL" name="Rails GoogleAuthExampleApp: test" uuid="cf58a8df-6389-4a4a-a144-cdf0220e0dac">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+  <data-source source="LOCAL" name="Rails GoogleAuthExampleApp: production" uuid="23541ccb-b50e-4192-8d54-1262753b406e">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+  <data-source source="LOCAL" name="Rails GoogleAuthExampleApp: development" uuid="7cf7564a-ac7d-4af5-9895-1ca51c2b3004">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+</component>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="3738118398">
+    <data-source source="LOCAL" name="Rails GoogleAuthExampleApp: default" uuid="485c78e2-89b0-4d68-a54e-390ab1320b74">
+      <driver-ref>postgresql</driver-ref>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql:&lt;%= ENV['app_name'] %&gt;_development</jdbc-url>
+      <user-name>&lt;%= ENV['database_username'] %&gt;</user-name>
+      <user-password>df96df8fdf97df8adfefdfe4dffcdff1df8ddfcedfcbdfdedfcbdfc8dfcbdfd9dfcfdff5dfdadfcbdfd9dfd9dfdddfc5dfd8dfcedf8ddff7df8adf8fdf94</user-password>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="Rails GoogleAuthExampleApp: test" uuid="cf58a8df-6389-4a4a-a144-cdf0220e0dac">
+      <driver-ref>postgresql</driver-ref>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql:&lt;%= ENV['app_name'] %&gt;_test</jdbc-url>
+      <user-name>&lt;%= ENV['database_username'] %&gt;</user-name>
+      <user-password>df96df8fdf97df8adfefdfe4dffcdff1df8ddfcedfcbdfdedfcbdfc8dfcbdfd9dfcfdff5dfdadfcbdfd9dfd9dfdddfc5dfd8dfcedf8ddff7df8adf8fdf94</user-password>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="Rails GoogleAuthExampleApp: production" uuid="23541ccb-b50e-4192-8d54-1262753b406e">
+      <driver-ref>postgresql</driver-ref>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql:&lt;%= ENV['app_name'] %&gt;_production</jdbc-url>
+      <user-name>&lt;%= ENV['database_username'] %&gt;</user-name>
+      <user-password>df96df8fdf97df8adfefdfe4dffcdff1df8ddfcedfcbdfdedfcbdfc8dfcbdfd9dfcfdff5dfdadfcbdfd9dfd9dfdddfc5dfd8dfcedf8ddff7df8adf8fdf94</user-password>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="Rails GoogleAuthExampleApp: development" uuid="7cf7564a-ac7d-4af5-9895-1ca51c2b3004">
+      <driver-ref>postgresql</driver-ref>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql:&lt;%= ENV['app_name'] %&gt;_development</jdbc-url>
+      <user-name>&lt;%= ENV['database_username'] %&gt;</user-name>
+      <user-password>df96df8fdf97df8adfefdfe4dffcdff1df8ddfcedfcbdfdedfcbdfc8dfcbdfd9dfcfdff5dfdadfcbdfd9dfd9dfdddfc5dfd8dfcedf8ddff7df8adf8fdf94</user-password>
+      <libraries />
+    </data-source>
+  </component>
+</project>
+
