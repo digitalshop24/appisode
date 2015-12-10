@@ -2,7 +2,7 @@ class SubscriptionsController < ApplicationController
   def create
 
     @user = User.find(params[:user_id])
-    options = {:season => params[:season], :episode => params[:episode], :three_episodes => params[:three_episodes]}
+    options = {:season => params[:season], :episode => params[:episode], :three_episode => params[:three_episode]}
     if @user.subscriptions.find_by_serial_id(params[:show_id]).nil?
       @subscription = @user.subscriptions.new(:serial_id => params[:show_id], :options => options)
       @subscription.save

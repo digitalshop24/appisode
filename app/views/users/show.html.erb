@@ -38,7 +38,7 @@
               </div>
               <div class="field">
               Подписка на 3 серии<br>
-                <%= check_box_tag(:three_episodes, "value", checked = (true if (current_user.subscriptions.find_by_serial_id(f.serial_id).options['three_episodes']) != nil))  %>
+                <%= check_box_tag(:three_episode, "value", checked = (true if (current_user.subscriptions.find_by_serial_id(f.serial_id).options['three_episode']) != nil))  %>
               </div>
               <div>
                 <%= submit_tag("подписаться", class: "btn btn-default") %>

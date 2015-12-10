@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Google Auth Example App</title>
+    <title>Appisode</title>
     <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link href="assets/stylesheets/app.css">
     <%= csrf_meta_tags %>
   </head>
   <body>
@@ -14,7 +17,7 @@
               <!-- Brand and toggle get grouped for better mobile display -->
               <div class="navbar-header">
 
-                <a class="navbar-brand" href="/">App Name</a>
+                <a class="navbar-brand" href="/">Appisode</a>
               </div>
 
               <!-- Collect the nav links, forms, and other content for toggling -->
@@ -23,14 +26,16 @@
 
                 <ul class="nav navbar-nav navbar-right">
 
+                  <li>
+                    <%= link_to "Настройки", "/users/#{current_user.id}" %>
+                  </li>
                   <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Добро пожаловать, <strong><%= current_user.name %></strong>! <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li><%= link_to "Настройки", "/users/#{current_user.id}" %></li>
-                      <li role="separator" class="divider"></li>
-                      <li><%= link_to "Sign out", signout_path, id: "sign_out" %></li>
+                      <li><%= link_to "Выйти", signout_path, id: "sign_out" %></li>
                     </ul>
                   </li>
+
                 </ul>
               </div><!-- /.navbar-collapse -->
             </div><!-- /.container-fluid -->
@@ -42,7 +47,128 @@
             <%= yield %>
           </div>
       <% else %>
-        <%= link_to "Sign in with Google", "/auth/google_oauth2", id: "sign_in" %>
+
+          <div class="container">
+
+
+            <div class="onl_login">
+              <h3 class="onl_authTitle" data-toggle="tooltip" data-placement="bottom" title="Recommended: Lumen Theme">Login</h3>
+              <div class="row onl_row-sm-offset-3 onl_socialButtons">
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-facebook" data-toggle="tooltip" data-placement="top" title="Facebook">
+                    <i class="fa fa-facebook fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-twitter" data-toggle="tooltip" data-placement="top" title="Twitter">
+                    <i class="fa fa-twitter fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="/auth/google_oauth2" class="btn btn-lg btn-block onl_btn-google-plus" data-toggle="tooltip" data-placement="top" title="Google Plus">
+                    <i class="fa fa-google-plus fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+              </div><br>
+
+              <div class="row onl_row-sm-offset-3 onl_socialButtons">
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-github" data-toggle="tooltip" data-placement="top" title="GitHub">
+                    <i class="fa fa-github fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-soundcloud" data-toggle="tooltip" data-placement="top" title="SoundCloud">
+                    <i class="fa fa-soundcloud fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-steam" data-toggle="tooltip" data-placement="top" title="Steam">
+                    <i class="fa fa-steam fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+              </div><br>
+              <div class="row onl_row-sm-offset-3 onl_socialButtons">
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-pinterest" data-toggle="tooltip" data-placement="top" title="Pinterest">
+                    <i class="fa fa-pinterest fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-vimeo" data-toggle="tooltip" data-placement="top" title="Vimeo">
+                    <i class="fa fa-vimeo-square fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-lastfm" data-toggle="tooltip" data-placement="top" title="Lastfm">
+                    <i class="fa fa-lastfm fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+              </div><br>
+              <div class="row onl_row-sm-offset-3 onl_socialButtons">
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-yahoo" data-toggle="tooltip" data-placement="top" title="Yahoo">
+                    <i class="fa fa-yahoo fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-vk" data-toggle="tooltip" data-placement="top" title="VKontakte">
+                    <i class="fa fa-vk fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-spotify" data-toggle="tooltip" data-placement="top" title="Spotify">
+                    <i class="fa fa-spotify fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+              </div><br>
+              <div class="row onl_row-sm-offset-3 onl_socialButtons">
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-linkedin" data-toggle="tooltip" data-placement="top" title="LinkedIn">
+                    <i class="fa fa-linkedin fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-stumbleupon" data-toggle="tooltip" data-placement="top" title="Stumble Upon">
+                    <i class="fa fa-stumbleupon fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+                <div class="col-xs-2 col-sm-2">
+                  <a href="#" class="btn btn-lg btn-block onl_btn-tumblr" data-toggle="tooltip" data-placement="top" title="Tumblr">
+                    <i class="fa fa-tumblr fa-2x"></i>
+                    <span class="hidden-xs"></span>
+                  </a>
+                </div>
+              </div>
+
+
+
+
+
+            </div>
+
+
+
+          </div>
+          <script>
+              $(function () {
+                  $('[data-toggle="tooltip"]').tooltip()
+              })
+          </script>
       <% end %>
     </div>
 

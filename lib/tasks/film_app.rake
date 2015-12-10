@@ -13,7 +13,7 @@ namespace :film_app do
         false
       end
     end
-    (1..64598).each do |i|
+    (17491..64598).each do |i|
       begin
       Tmdb::Api.language("ru")
       russian_name = Tmdb::TV.detail(i)["name"]
@@ -62,19 +62,46 @@ namespace :film_app do
 
   desc "for updates for subscriptions"
   task :update => :environment do
+    current_date = Date.parse(Time.now.to_s.slice(0..9))
     User.all.each do |i|
       i.subscriptions.each do |j|
-        if j.options['season']
-          #TODO send email with serial name and season released text
-          puts "#{i.email} recieved season announce about #{Show.find(j.serial_id).additional_field}"
-        end
-        if j.options['episode']
-          #TODO send email with serial name and episode released text
-          puts "#{i.email} recieved episode announce about #{Show.find(j.serial_id).additional_field}"
-        end
-        if j.options['three_episodes']
-          #TODO send email with serial name and three_episodes released text
-          puts "#{i.email} recieved three_episodes announce about #{Show.find(j.serial_id).additional_field}"
+        season_release_date = Date.parse(Show.find(j.serial_id).season_date)
+        if season_release_date >= current_date
+          if j.options['season']
+            if Show.find(j.serial_id).season_date
+              if season_release_date == current_date
+                #TODO send email with serial name and season released text
+                u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=новый сезон сериала #{Show.find(j.serial_id).russian_name} вышел&sender=CMC")
+                uri = URI(u)
+                a = Net::HTTP.get(uri)
+                puts "#{i.email}"
+              end
+            end
+          end
+          if j.options['episode']
+            if Show.find(j.serial_id).episode_date
+              episode_release_date = Date.parse(Show.find(j.serial_id).episode_date)
+              if episode_release_date == current_date
+                #TODO send email with serial name and episode released text
+                u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=новая серия сериала #{Show.find(j.serial_id).russian_name} вышла&sender=CMC")
+                uri = URI(u)
+                a = Net::HTTP.get(uri)
+                puts "#{i.email} recieved episode announce about #{Show.find(j.serial_id).additional_field}"
+              end
+            end
+          end
+          if j.options['three_episode']
+            if Show.find(j.serial_id).three_episode
+              three_episode_release_date = Date.parse(Show.find(j.serial_id).three_episode)
+              if three_episode_release_date == current_date
+                #TODO send email with serial name and three_episodes released text
+                u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=три серии сериала #{Show.find(j.serial_id).russian_name} вышли&sender=CMC")
+                uri = URI(u)
+                a = Net::HTTP.get(uri)
+                puts "#{i.email} recieved three_episodes announce about #{Show.find(j.serial_id).additional_field}"
+              end
+            end
+          end
         end
       end
     end
