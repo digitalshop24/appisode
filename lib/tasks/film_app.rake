@@ -13,7 +13,7 @@ namespace :film_app do
         false
       end
     end
-    (17491..64598).each do |i|
+    (1418..64598).each do |i|
       begin
       Tmdb::Api.language("ru")
       russian_name = Tmdb::TV.detail(i)["name"]
@@ -29,7 +29,7 @@ namespace :film_app do
         three_series = []
         i = 0
         while three_series.count < 3 && i <= number_of_episodes
-          if last_season["episodes"][i]["air_date"] > Time.zone.now.to_s.slice(0..9)
+          if last_season["episodes"][i]["air_date"] >= Time.zone.now.to_s.slice(0..9)
             three_series << last_season["episodes"][i]["air_date"]
           end
 
@@ -48,10 +48,14 @@ namespace :film_app do
         full_season_release = Tmdb::TV.detail(i)["last_air_date"]
         show_params = {:season_date => full_season_release, :additional_field => show['original_name'], :poster => show['poster_path'], :russian_name => russian_name, :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
       end
-      a = Show.new(show_params)
-      a.save
+      c = Show.find_by_additional_field(show['original_name'])
+      if c.nil?
+        a = Show.new(show_params)
+        a.save
+      else
+        c.update(show_params)
+      end
       puts "#{Time.now} - #{i}Success!"
-      sleep 0.4
       rescue
         puts "bad"
         next
