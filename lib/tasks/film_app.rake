@@ -15,47 +15,47 @@ namespace :film_app do
     end
     (1418..64598).each do |i|
       begin
-      Tmdb::Api.language("ru")
-      russian_name = Tmdb::TV.detail(i)["name"]
-      show = Tmdb::TV.detail(i)
-      number_of_seasons = show["number_of_seasons"]
-      if on_air?(show["last_air_date"])
-        last_season = Tmdb::Season.detail(i, number_of_seasons)
-        number_of_episodes = last_season["episodes"].count - 1
-        if number_of_episodes <= 0
-          last_season = Tmdb::Season.detail(i, number_of_seasons-1)
+        Tmdb::Api.language("ru")
+        russian_name = Tmdb::TV.detail(i)["name"]
+        show = Tmdb::TV.detail(i)
+        number_of_seasons = show["number_of_seasons"]
+        if on_air?(show["last_air_date"])
+          last_season = Tmdb::Season.detail(i, number_of_seasons)
           number_of_episodes = last_season["episodes"].count - 1
-        end
-        three_series = []
-        i = 0
-        while three_series.count < 3 && i <= number_of_episodes
-          if last_season["episodes"][i]["air_date"] >= Time.zone.now.to_s.slice(0..9)
-            three_series << last_season["episodes"][i]["air_date"]
+          if number_of_episodes <= 0
+            last_season = Tmdb::Season.detail(i, number_of_seasons-1)
+            number_of_episodes = last_season["episodes"].count - 1
+          end
+          three_series = []
+          i = 0
+          while three_series.count < 3 && i <= number_of_episodes
+            if last_season["episodes"][i]["air_date"] >= Time.zone.now.to_s.slice(0..9)
+              three_series << last_season["episodes"][i]["air_date"]
+            end
+
+            i+=1
           end
 
-          i+=1
-        end
+          full_season_release = last_season["episodes"][number_of_episodes]["air_date"]
+          if three_series.count == 3
+            three_episode = three_series[2]
+          else
+            three_episode = nil
+          end
 
-        full_season_release = last_season["episodes"][number_of_episodes]["air_date"]
-        if three_series.count == 3
-          three_episode = three_series[2]
+          show_params = {:season_date => full_season_release, :episode_date => three_series[0], :three_episode => three_episode, :russian_name => russian_name, :additional_field => show['original_name'], :poster => show['poster_path'], :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
         else
-          three_episode = nil
+          full_season_release = Tmdb::TV.detail(i)["last_air_date"]
+          show_params = {:season_date => full_season_release, :additional_field => show['original_name'], :poster => show['poster_path'], :russian_name => russian_name, :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
         end
-
-        show_params = {:season_date => full_season_release, :episode_date => three_series[0], :three_episode => three_episode, :russian_name => russian_name, :additional_field => show['original_name'], :poster => show['poster_path'], :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
-      else
-        full_season_release = Tmdb::TV.detail(i)["last_air_date"]
-        show_params = {:season_date => full_season_release, :additional_field => show['original_name'], :poster => show['poster_path'], :russian_name => russian_name, :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
-      end
-      c = Show.find_by_additional_field(show['original_name'])
-      if c.nil?
-        a = Show.new(show_params)
-        a.save
-      else
-        c.update(show_params)
-      end
-      puts "#{Time.now} - #{i}Success!"
+        c = Show.find_by_additional_field(show['original_name'])
+        if c.nil?
+          a = Show.new(show_params)
+          a.save
+        else
+          c.update(show_params)
+        end
+        puts "#{Time.now} - #{i}Success!"
       rescue
         puts "bad"
         next
@@ -90,7 +90,7 @@ namespace :film_app do
                 u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=новая серия сериала #{Show.find(j.serial_id).russian_name} вышла&sender=CMC")
                 uri = URI(u)
                 a = Net::HTTP.get(uri)
-                puts "#{i.email} recieved episode announce about #{Show.find(j.serial_id).additional_field}"
+                puts "#{i.email} recieved episode announce about #{Show.find(j.serial_id).additional_field} #{a}"
               end
             end
           end
@@ -102,7 +102,7 @@ namespace :film_app do
                 u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=три серии сериала #{Show.find(j.serial_id).russian_name} вышли&sender=CMC")
                 uri = URI(u)
                 a = Net::HTTP.get(uri)
-                puts "#{i.email} recieved three_episodes announce about #{Show.find(j.serial_id).additional_field}"
+                puts "#{i.email} recieved three_episodes announce about #{Show.find(j.serial_id).additional_field} #{a}"
               end
             end
           end
