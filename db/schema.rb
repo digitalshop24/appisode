@@ -11,13 +11,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151209004756) do
+ActiveRecord::Schema.define(version: 20151210094956) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "hstore"
 
-  create_table "series", force: true do |t|
+  create_table "series", force: :cascade do |t|
     t.integer "user_id",   null: false
     t.integer "film_id",   null: false
     t.integer "title",     null: false
@@ -28,7 +28,7 @@ ActiveRecord::Schema.define(version: 20151209004756) do
     t.text    "third"
   end
 
-  create_table "shows", force: true do |t|
+  create_table "shows", force: :cascade do |t|
     t.string   "poster"
     t.boolean  "in_production"
     t.integer  "episode_count"
@@ -38,9 +38,10 @@ ActiveRecord::Schema.define(version: 20151209004756) do
     t.text     "season_date"
     t.text     "episode_date"
     t.text     "three_episode"
+    t.string   "russian_name"
   end
 
-  create_table "subscriptions", force: true do |t|
+  create_table "subscriptions", force: :cascade do |t|
     t.integer  "serial_id"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -50,7 +51,7 @@ ActiveRecord::Schema.define(version: 20151209004756) do
 
   add_index "subscriptions", ["user_id"], name: "index_subscriptions_on_user_id", using: :btree
 
-  create_table "users", force: true do |t|
+  create_table "users", force: :cascade do |t|
     t.string   "provider"
     t.string   "uid"
     t.string   "name"

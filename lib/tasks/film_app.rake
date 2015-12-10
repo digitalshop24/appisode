@@ -13,7 +13,10 @@ namespace :film_app do
         false
       end
     end
-    (1399..64598).each do |i|
+    (1..64598).each do |i|
+      begin
+      Tmdb::Api.language("ru")
+      russian_name = Tmdb::TV.detail(i)["name"]
       show = Tmdb::TV.detail(i)
       number_of_seasons = show["number_of_seasons"]
       if on_air?(show["last_air_date"])
@@ -40,15 +43,19 @@ namespace :film_app do
           three_episode = nil
         end
 
-        show_params = {:season_date => full_season_release, :episode_date => three_series[0], :three_episode => three_episode, :additional_field => show['original_name'], :poster => show['poster_path'], :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
+        show_params = {:season_date => full_season_release, :episode_date => three_series[0], :three_episode => three_episode, :russian_name => russian_name, :additional_field => show['original_name'], :poster => show['poster_path'], :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
       else
         full_season_release = Tmdb::TV.detail(i)["last_air_date"]
-        show_params = {:season_date => full_season_release, :additional_field => show['original_name'], :poster => show['poster_path'], :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
+        show_params = {:season_date => full_season_release, :additional_field => show['original_name'], :poster => show['poster_path'], :russian_name => russian_name, :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
       end
       a = Show.new(show_params)
       a.save
       puts "#{Time.now} - #{i}Success!"
       sleep 0.4
+      rescue
+        puts "bad"
+        next
+      end
     end
     puts "#{Time.now} - FINISH!!!"
   end
