@@ -1,10 +1,13 @@
-class UserNotifier < ActionMailer::Base
-  default :from => 'any_from_address@example.com'
+class UserNotifier < BaseMandrillMailer
+  def welcome(user_id)
+    user = User.find(user_id)
+    subject = "Welcome to our awesome app!"
+    merge_vars = {
+        "FIRST_NAME" => user.first_name,
+        "USER_URL" => user_url(user),
+    }
+    body = mandrill_template("welcome", merge_vars)
 
-  # send a signup email to the user, pass in the user object that   contains the user's email address
-  def send_signup_email(user)
-    @user = user
-    mail( :to => @user.email,
-          :subject => 'Thanks for signing up for our amazing app' )
+    send_mail(user.email, subject, body)
   end
 end

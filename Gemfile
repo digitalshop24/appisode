@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.3'
 gem 'rake', '10.4.2'
+gem 'mandrill-api'
 
 gem 'omniauth-google-oauth2', '~> 0.2.1'
 
