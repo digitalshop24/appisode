@@ -114,4 +114,9 @@ namespace :film_app do
       end
     end
   end
+
+  desc "TODO"
+  task :test => :environment do
+    puts "sadsd"
+  end
 end
