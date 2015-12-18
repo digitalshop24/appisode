@@ -44,7 +44,7 @@ class UsersController < ApplicationController
 
       if @user.update(user_params)
 
-        format.html { redirect_to @user, notice: 'User was successfully updated.' }
+        format.html { redirect_to @user, notice: 'Данные сохранены' }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
@@ -55,13 +55,7 @@ class UsersController < ApplicationController
 
   # DELETE /users/1
   # DELETE /users/1.json
-  def destroy
-    @user.destroy
-    respond_to do |format|
-      format.html { redirect_to users_url }
-      format.json { head :no_content }
-    end
-  end
+
 
   private
     # Use callbacks to share common setup or constraints between actions.

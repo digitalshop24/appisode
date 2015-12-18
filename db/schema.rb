@@ -11,11 +11,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151211140300) do
+ActiveRecord::Schema.define(version: 20151214125323) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "hstore"
+
+  create_table "identities", force: :cascade do |t|
+    t.integer  "user_id"
+    t.string   "provider"
+    t.string   "uid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "identities", ["user_id"], name: "index_identities_on_user_id", using: :btree
 
   create_table "series", force: :cascade do |t|
     t.integer "user_id",   null: false
@@ -62,6 +72,14 @@ ActiveRecord::Schema.define(version: 20151211140300) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "updated"
+    t.integer  "sign_in_count",       default: 0,  null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.inet     "current_sign_in_ip"
+    t.inet     "last_sign_in_ip"
+    t.string   "encrypted_password",  default: "", null: false
+    t.datetime "remember_created_at"
   end
 
+  add_foreign_key "identities", "users"
 end

@@ -5,7 +5,15 @@ gem 'rails', '4.2.3'
 gem 'rake', '10.4.2'
 gem 'mandrill-api'
 
-gem 'omniauth-google-oauth2', '~> 0.2.1'
+gem 'devise'
+gem 'omniauth'
+gem 'omniauth-google-oauth2'
+gem 'omniauth-twitter'
+gem 'omniauth-facebook'
+gem 'omniauth-linkedin'
+gem "omniauth-github"
+
+gem 'omniauth-steam'
 
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 4.0.0'
