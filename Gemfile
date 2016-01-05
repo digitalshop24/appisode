@@ -48,6 +48,11 @@ group :doc do
   gem 'sdoc', require: false
 end
 
+gem 'will_paginate', '~> 3.0.6'
+gem 'grape', '~> 0.13.0'
+gem 'grape-entity', '~> 0.4.8'
+gem 'grape-swagger-rails', '~> 0.1.0'
+
 group :production do
   gem 'unicorn', '~> 4.9'
 end

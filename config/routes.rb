@@ -9,4 +9,7 @@ GoogleAuthExample::Application.routes.draw do
   root to: "home#show"
   resource :series
   resources :subscriptions
+
+  mount API::Root => '/'
+  mount GrapeSwaggerRails::Engine => '/apidoc'
 end
