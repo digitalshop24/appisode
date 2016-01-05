@@ -68,9 +68,10 @@ namespace :film_app do
   task :update => :environment do
     current_date = Date.parse(Time.now.to_s.slice(0..9))
     User.all.each do |i|
-      puts i
       if i.updated.nil? || i.updated != current_date
+        puts i.email
         i.subscriptions.each do |j|
+          puts j.serial_id
         season_release_date = Date.parse(Show.find(j.serial_id).season_date)
         if season_release_date >= current_date
           if j.options['season']
