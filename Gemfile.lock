@@ -247,7 +247,6 @@ GEM
       rdoc (~> 4.0)
     sendgrid (1.2.0)
       json
-      json
     slop (3.6.0)
     sprockets (2.12.4)
       hike (~> 1.2)
@@ -328,3 +327,7 @@ DEPENDENCIES
   unicorn (~> 4.9)
   whenever
   will_paginate (~> 3.0.6)
+=======
+
+BUNDLED WITH
+   1.11.2
