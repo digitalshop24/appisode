@@ -69,8 +69,10 @@ namespace :film_app do
     current_date = Date.parse(Time.now.to_s.slice(0..9))
     User.all.each do |i|
       if i.updated.nil? || i.updated != current_date
+        puts a
         puts i.email
         i.subscriptions.each do |j|
+          puts b
           puts j.serial_id
         season_release_date = Date.parse(Show.find(j.serial_id).season_date)
         if season_release_date >= current_date
