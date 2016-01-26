@@ -11,79 +11,43 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151214090527) do
+ActiveRecord::Schema.define(version: 20160126090258) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-  enable_extension "hstore"
-
-  create_table "identities", force: :cascade do |t|
-    t.integer  "user_id"
-    t.string   "provider"
-    t.string   "uid"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  add_index "identities", ["user_id"], name: "index_identities_on_user_id", using: :btree
-
-  create_table "series", force: :cascade do |t|
-    t.integer "user_id",   null: false
-    t.integer "film_id",   null: false
-    t.integer "title",     null: false
-    t.text    "logo"
-    t.text    "date"
-    t.text    "full_date"
-    t.text    "second"
-    t.text    "third"
-  end
 
   create_table "shows", force: :cascade do |t|
     t.string   "poster"
     t.boolean  "in_production"
     t.integer  "episode_count"
     t.string   "additional_field"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.text     "season_date"
-    t.text     "episode_date"
-    t.text     "three_episode"
+    t.string   "season_date"
+    t.string   "episode_date"
+    t.string   "three_episodes"
     t.string   "russian_name"
+    t.string   "name"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
   end
 
   create_table "subscriptions", force: :cascade do |t|
-    t.integer  "serial_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.hstore   "options",    default: {}, null: false
+    t.integer  "show_id"
+    t.boolean  "episode"
+    t.boolean  "three_episodes"
+    t.boolean  "season"
     t.integer  "user_id"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
   end
 
   add_index "subscriptions", ["user_id"], name: "index_subscriptions_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
-    t.string   "provider"
-    t.string   "uid"
     t.string   "name"
-    t.string   "oauth_token"
-    t.text     "email"
-    t.text     "number"
-    t.datetime "oauth_expires_at"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.datetime "updated"
-    t.string   "encrypted_password",     default: "", null: false
-    t.string   "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          default: 0,  null: false
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
-    t.inet     "current_sign_in_ip"
-    t.inet     "last_sign_in_ip"
+    t.string   "confirmation"
+    t.string   "phone"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
   end
 
-  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
-
-  add_foreign_key "identities", "users"
 end

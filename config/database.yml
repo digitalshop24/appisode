@@ -13,4 +13,4 @@ test:
   database: <%= ENV['app_name'] %>_test
 production:
   <<: *default
-  database: <%= ENV['app_name'] %>_production
+  database: <%= ENV['app_name'] %>_production= ENV['APPISODE_DATABASE_PASSWORD'] %>

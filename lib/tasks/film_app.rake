@@ -43,12 +43,12 @@ namespace :film_app do
             three_episode = nil
           end
 
-          show_params = {:season_date => full_season_release, :episode_date => three_series[0], :three_episode => three_episode, :russian_name => russian_name, :additional_field => show['original_name'], :poster => show['poster_path'], :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
+          show_params = {:season_date => full_season_release, :episode_date => three_series[0], :three_episode => three_episode, :russian_name => russian_name, :name => show['original_name'], :poster => show['poster_path'], :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
         else
           full_season_release = Tmdb::TV.detail(i)["last_air_date"]
-          show_params = {:season_date => full_season_release, :additional_field => show['original_name'], :poster => show['poster_path'], :russian_name => russian_name, :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
+          show_params = {:season_date => full_season_release, :name => show['original_name'], :poster => show['poster_path'], :russian_name => russian_name, :in_production => on_air?(show["last_air_date"]), :episode_count => show['number_of_seasons']}
         end
-        c = Show.find_by_additional_field(show['original_name'])
+        c = Show.find_by_name(show['original_name'])
         if c.nil?
           a = Show.new(show_params)
           a.save

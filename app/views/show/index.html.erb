@@ -1,0 +1,61 @@
+<div>
+<h1 class="text-center">Сериалы</h1>
+<%= form_tag("/show", method: "get" ) do %>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+          <div id="imaginary_container">
+            <div class="input-group stylish-input-group">
+              <%= text_field_tag(:name, "", id: 'lor', class: "form-control") %>
+            <span class="input-group-addon">
+              <button type="submit">
+                <span class="glyphicon glyphicon-search"></span>
+              </button>
+            </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<%end%>
+</div>
+
+<%if @shows %>
+  <div class="wrapper">
+    <%if @shows.empty? %>
+      Nothing found :(
+    <% else%>
+<table class="table">
+  <% @shows.each do |f| %>
+	<div class="record" data-id="<%= f.id %>"></div>
+    <tr>
+      <td><%= image_tag("http://image.tmdb.org/t/p/w500#{f.poster}", size: "370x520") %></td>
+      <td>
+        <table >
+          <tr>
+            <div>Название</div>
+            <div><%= f.name%></div>
+          </tr>
+          <tr>
+            <div>
+              <div>Количество сезонов</div>
+              <%= f.episode_count%>
+            </div>
+          </tr>
+          <tr>
+            <div>выход следующей серии серии</div>
+            <div><%= f.episode_date %></div>
+            <div>выход трех эпизодов</div>
+            <div><%= f.three_episodes%></div>
+            <div>выход сезона целиком</div>
+            <div><%= f.season_date%></div>
+          </tr>
+        </table>
+      </td>
+    </tr>    
+  <%end%>
+</table>
+      </div>    
+    <%end %>
+  </div>
+<%end %>

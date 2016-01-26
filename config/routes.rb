@@ -1,15 +1,48 @@
-GoogleAuthExample::Application.routes.draw do
-  devise_for :users, :controllers => { omniauth_callbacks: 'omniauth_callbacks' }
-  resources :users
-  get 'users/auth/:provider/callback', to: 'sessions#create'
-  get 'auth/failure', to: redirect('/')
-  resources :sessions, only: [:create, :destroy]
-  resource :home
+Rails.application.routes.draw do
+  # root 'welcome#index'
+  resources :show
 
-  root to: "home#show"
-  resource :series
-  resources :subscriptions
+	get '/subscription/show', to: 'subscription#show'
+	get '/subscription/add', to: 'subscription#add'
+	get '/user/registration', to: 'user#registration'
+	get 'user/recovery', to: 'user#recovery'
+	# Example resource route with options:
+  #   resources :products do
+  #     member do
+  #       get 'short'
+  #       post 'toggle'
+  #     end
+  #
+  #     collection do
+  #       get 'sold'
+  #     end
+  #   end
 
-  mount API::Root => '/'
-  mount GrapeSwaggerRails::Engine => '/apidoc'
+  # Example resource route with sub-resources:
+  #   resources :products do
+  #     resources :comments, :sales
+  #     resource :seller
+  #   end
+
+  # Example resource route with more complex sub-resources:
+  #   resources :products do
+  #     resources :comments
+  #     resources :sales do
+  #       get 'recent', on: :collection
+  #     end
+  #   end
+
+  # Example resource route with concerns:
+  #   concern :toggleable do
+  #     post 'toggle'
+  #   end
+  #   resources :posts, concerns: :toggleable
+  #   resources :photos, concerns: :toggleable
+
+  # Example resource route within a namespace:
+  #   namespace :admin do
+  #     # Directs /admin/products/* to Admin::ProductsController
+  #     # (app/controllers/admin/products_controller.rb)
+  #     resources :products
+  #   end
 end
