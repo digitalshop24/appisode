@@ -4,9 +4,9 @@ class CreateShows < ActiveRecord::Migration
 			t.string :poster
       t.boolean :in_production
 			t.integer :episode_count
-			t.string :season_date
-			t.string :episode_date
-			t.string :three_episodes
+			t.date :season_date
+			t.date :episode_date
+			t.date :three_episodes
       t.string :russian_name
 			t.string :name			
 			t.timestamps null: false
