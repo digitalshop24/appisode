@@ -20,14 +20,13 @@ ActiveRecord::Schema.define(version: 20160126090258) do
     t.string   "poster"
     t.boolean  "in_production"
     t.integer  "episode_count"
-    t.string   "additional_field"
-    t.string   "season_date"
-    t.string   "episode_date"
-    t.string   "three_episodes"
+    t.date     "season_date"
+    t.date     "episode_date"
+    t.date     "three_episodes"
     t.string   "russian_name"
     t.string   "name"
-    t.datetime "created_at",       null: false
-    t.datetime "updated_at",       null: false
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
   end
 
   create_table "subscriptions", force: :cascade do |t|
