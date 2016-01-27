@@ -1,0 +1,18 @@
+ default: &default
+   app_name: 'appisode'
+   host: 'localhost:3000'
+   api_key: '15e545fda3d4598527fac7245a459571'
+   client_id: '283921014541-5av2m7btqn6au830qrjostaks735bck5.apps.googleusercontent.com'
+   client_secret: 'z1V9RcctGSMQ766GlEWw9xlI'
+   database_username: 'postgres'
+   database_password: '0194'
+ development:
+   <<: *default
+ test:
+   <<: *default
+ production:
+   <<: *default
+   host: 'appisode.dshop24.ru'
+   database_username: 'deployer'
+   database_password: 'digita!shop'
+   SECRET_KEY_BASE: bc6de96a1165172828328c63a8ee28b45b1d62b1971795dc992d52e99559840dfc9162caf15664bfdc1ec399709a5804e0fffed75857ad4e7b5d766ec616f5d1
