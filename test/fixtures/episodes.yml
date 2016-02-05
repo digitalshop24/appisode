@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  season_id: 
+  show_id: 
+  air_date: 2016-02-05
+
+two:
+  season_id: 
+  show_id: 
+  air_date: 2016-02-05

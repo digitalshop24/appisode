@@ -1,5 +1,52 @@
+require 'open-uri'
 namespace :film_app do
   desc "Rake task to get events data"
+
+  task load: :environment do
+    def Show.get_json(path, params)
+      api_key = '15e545fda3d4598527fac7245a459571'
+      url = 'http://api.themoviedb.org/3/tv'
+      get_params = params
+      get_params[:api_key] = api_key
+      uri = URI.escape("#{url}/#{path}?#{get_params.to_query}")
+      resp = open(uri).read
+      JSON.parse(resp)
+    end
+
+    def Show.image_url(image, format = 'w500')
+      "http://image.tmdb.org/t/p/#{format}#{image}"
+    end
+
+    (1..1000).each do |i|
+      shows = Show.get_json('popular', { page: i })['results']
+      shows.each do |show|
+        show = Show.get_json(show['id'], { language: 'ru' })
+        new_show = Show.where(tmdb_id: show['id']).first_or_create(
+          russian_name: show['name'],
+          name: show['original_name'],
+          poster: Show.image_url(show['poster_path']),
+          in_production: show['in_production']
+        )
+        show['seasons'].each do |season|
+          new_season = new_show.seasons.where(tmdb_id: season['id']).first_or_create(
+            number: season['season_number'],
+            poster: Show.image_url(season['poster_path'])
+          )
+          season = Show.get_json("#{new_show.tmdb_id}/season/#{new_season.number}", { language: 'ru' })
+          season['episodes'].each do |episode|
+            new_season.episodes.where(tmdb_id: episode['id']).first_or_create(
+              air_date: (Date.parse(episode["air_date"]) if episode["air_date"]),
+              number: episode['episode_number']
+            )
+          end
+          puts "------ #{Time.now} - season #{new_season.number} for \"#{new_show.name}\" loaded with #{season['episodes'].count} episodes"
+        end
+        puts "--- #{Time.now} - show \"#{new_show.name}\" loaded"
+      end
+      puts "#{Time.now} - page #{i} done"
+    end
+  end
+
   task :download => :environment do
     Tmdb::Api.key('15e545fda3d4598527fac7245a459571')
     def on_air?(date)

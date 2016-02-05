@@ -1,15 +1,14 @@
 module API
   module Entities
-    class Show < Grape::Entity
+    class ShowPreview < Grape::Entity
       expose :id, documentation: {type: "Integer",  desc: "ID"}
-      expose :poster, documentation: { type: "String", desc: "Постер (http://image.tmdb.org/t/p/w500/...)" }
+      expose :poster, documentation: { type: "String", desc: "Постер" }
       expose :name, documentation: { type: "String", desc: "Название" }
       expose :russian_name, documentation: { type: "String", desc: "Название на русском" }
       expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
-      expose :season_date, documentation: { type: "String", desc: "Дата выхода эпизода" }
-      expose :episode_date, documentation: { type: "Boolean", desc: "Дата выхода серии" }
-      expose :three_episodes, documentation: { type: "Boolean", desc: "Дата выхода трех серий" }
-      expose :episode_count, documentation: { type: "Integer", desc: "Количество серий" }
+      expose :next_episode, documentation: { type: "String", desc: "Next episode" } do |show|
+        show.next_episode.air_date if show.next_episode
+      end
     end
   end
 end
@@ -20,7 +19,7 @@ module API
       version 'v1'
       format :json
       content_type :json, "application/json;charset=UTF-8"
-      rescue_from :all
+      # rescue_from :all
 
       helpers do
         params :pagination do
@@ -30,29 +29,37 @@ module API
       end
 
       resource :shows, desc: 'Cериалы' do
-        desc "Список всех сериалов", entity: API::Entities::Show
+        desc "Список всех сериалов", entity: API::Entities::ShowPreview
         params do
           use :pagination
         end
         get do
-          present Show.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::Show
+          present Show.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
         end
 
-        desc "Поиск сериала", entity: API::Entities::Show
+        desc 'Popular shows'
+        # params do
+        #   optional :number, type: Integer, desc: 'Number of shows'
+        # end
+        get '/popular' do
+          present Show.popular, with: API::Entities::ShowPreview
+        end
+
+        desc "Поиск сериала", entity: API::Entities::ShowPreview
         params do
           use :pagination
           requires :query, type: String, desc: 'Запрос'
         end
         get '/search' do
-          present Show.search(params[:query]).paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::Show
+          present Show.search(params[:query]).paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
         end
 
-        desc "Сериал по id", entity: API::Entities::Show
+        desc "Сериал по id", entity: API::Entities::ShowPreview
         params do
           requires :id, type: Integer, desc: 'Id'
         end
         get '/:id' do
-          present Show.find(params[:id]), with: API::Entities::Show
+          present Show.find(params[:id]), with: API::Entities::ShowPreview
         end
       end
     end

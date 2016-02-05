@@ -18,3 +18,5 @@ pickle-email-*.html
 .project
 *.swp
 
+config/application.yml
+

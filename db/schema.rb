@@ -11,22 +11,42 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160126090258) do
+ActiveRecord::Schema.define(version: 20160205131939) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "episodes", force: :cascade do |t|
+    t.integer  "season_id"
+    t.integer  "number"
+    t.date     "air_date"
+    t.integer  "tmdb_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "episodes", ["season_id"], name: "index_episodes_on_season_id", using: :btree
+
+  create_table "seasons", force: :cascade do |t|
+    t.integer  "show_id"
+    t.integer  "number"
+    t.string   "poster"
+    t.integer  "tmdb_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "seasons", ["show_id"], name: "index_seasons_on_show_id", using: :btree
+
   create_table "shows", force: :cascade do |t|
     t.string   "poster"
     t.boolean  "in_production"
-    t.integer  "episode_count"
-    t.date     "season_date"
-    t.date     "episode_date"
-    t.date     "three_episodes"
-    t.string   "russian_name"
     t.string   "name"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.string   "russian_name"
+    t.integer  "tmdb_id"
+    t.integer  "number_of_seasons"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
   end
 
   create_table "subscriptions", force: :cascade do |t|
@@ -49,4 +69,6 @@ ActiveRecord::Schema.define(version: 20160126090258) do
     t.datetime "updated_at",   null: false
   end
 
+  add_foreign_key "episodes", "seasons"
+  add_foreign_key "seasons", "shows"
 end

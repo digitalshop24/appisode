@@ -3,12 +3,11 @@ class CreateShows < ActiveRecord::Migration
     create_table :shows do |t|
 			t.string :poster
       t.boolean :in_production
-			t.integer :episode_count
-			t.date :season_date
-			t.date :episode_date
-			t.date :three_episodes
-      t.string :russian_name
 			t.string :name			
+      t.string :russian_name
+      t.integer :tmdb_id
+      t.integer :number_of_seasons
+      
 			t.timestamps null: false
     end
   end

@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  show_id: 
+  number: 1
+  poster: MyString
+  episodes_count: 1
+  on_air: false
+
+two:
+  show_id: 
+  number: 1
+  poster: MyString
+  episodes_count: 1
+  on_air: false
