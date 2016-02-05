@@ -19,7 +19,7 @@ module API
       version 'v1'
       format :json
       content_type :json, "application/json;charset=UTF-8"
-      # rescue_from :all
+      rescue_from :all
 
       helpers do
         params :pagination do
