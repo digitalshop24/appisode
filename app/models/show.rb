@@ -1,8 +1,9 @@
 require 'open-uri'
 class Show < ActiveRecord::Base
   has_many :seasons
-  default_scope { order('created_at DESC') }	
-	def self.search(query)
+  has_many :subscriptions
+  # default_scope { order('created_at DESC') }	
+  def self.search(query)
 		where('lower(name) like lower(:query) or lower(russian_name) like lower(:query)', { query: "%#{query}%" })
   end
 	def self.get_json(path, params = {})
@@ -29,6 +30,9 @@ class Show < ActiveRecord::Base
   def episodes
   	ids = seasons.pluck(:id)
   	Episode.where(season_id: ids)
+  end
+  def upcoming_episodes
+  	episodes.where('air_date > ?', Time.now).order(air_date: :asc)
   end
   def next_episode
   	episodes.where('air_date > ?', Time.now).order(air_date: :asc).first

@@ -5,7 +5,7 @@
    client_id: '283921014541-5av2m7btqn6au830qrjostaks735bck5.apps.googleusercontent.com'
    client_secret: 'z1V9RcctGSMQ766GlEWw9xlI'
    database_username: 'postgres'
-   database_password: 'dshop24'
+   database_password: '8058729'
  development:
    <<: *default
  test:

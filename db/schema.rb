@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160205174739) do
+ActiveRecord::Schema.define(version: 20160246990559) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,16 @@ ActiveRecord::Schema.define(version: 20160205174739) do
   end
 
   add_index "episodes", ["season_id"], name: "index_episodes_on_season_id", using: :btree
+
+  create_table "notifications", force: :cascade do |t|
+    t.integer  "subscription_id"
+    t.date     "date"
+    t.string   "message"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "notifications", ["subscription_id"], name: "index_notifications_on_subscription_id", using: :btree
 
   create_table "seasons", force: :cascade do |t|
     t.integer  "show_id"
@@ -51,25 +61,26 @@ ActiveRecord::Schema.define(version: 20160205174739) do
 
   create_table "subscriptions", force: :cascade do |t|
     t.integer  "show_id"
-    t.boolean  "episode"
-    t.boolean  "three_episodes"
-    t.boolean  "season"
+    t.integer  "episode_id"
+    t.integer  "subtype"
     t.integer  "user_id"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.boolean  "active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_index "subscriptions", ["user_id"], name: "index_subscriptions_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
-    t.string   "confirmation"
+    t.integer  "confirmation"
     t.string   "phone"
+    t.string   "key"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
-    t.string   "key"
   end
 
   add_foreign_key "episodes", "seasons"
+  add_foreign_key "notifications", "subscriptions"
   add_foreign_key "seasons", "shows"
 end

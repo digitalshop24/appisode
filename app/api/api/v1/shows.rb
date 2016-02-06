@@ -1,15 +1,22 @@
 module API
   module Entities
-    class ShowPreview < Grape::Entity
-      expose :id, documentation: {type: "Integer",  desc: "ID"}
-      expose :poster, documentation: { type: "String", desc: "Постер" }
-      expose :name, documentation: { type: "String", desc: "Название" }
-      expose :russian_name, documentation: { type: "String", desc: "Название на русском" }
-      expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
-      expose :next_episode, documentation: { type: "String", desc: "Next episode" } do |show|
-        show.next_episode.air_date if show.next_episode
-      end
+    class Episode < Grape::Entity
+      expose :id, documentation: {type: Integer,  desc: "ID эпизода"}
+      expose :air_date, documentation: {type: Integer,  desc: "Дата выхода эпизода"}
     end
+    class ShowPreview < Grape::Entity
+      expose :id, documentation: {type: Integer,  desc: "ID"}
+      expose :poster, documentation: { type: String, desc: "Постер" }
+      expose :name, documentation: { type: String, desc: "Название" }
+      expose :russian_name, documentation: { type: String, desc: "Название на русском" }
+      expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
+      # expose :next_episode, if: lambda { |object, options| object.next_episode }, 
+      #    documentation: { type: String, desc: "Дата следующей серии" } do |show|
+      #     show.next_episode.air_date
+      # end
+      expose :next_episode, if: lambda { |object, options| object.next_episode }, 
+         documentation: { type: Episode, desc: "Next episode" }, using: API::Entities::Episode
+    end 
   end
 end
 
@@ -37,7 +44,7 @@ module API
           present Show.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
         end
 
-        desc 'Popular shows'
+        desc 'Популярные сериалы', entity: API::Entities::ShowPreview
         # params do
         #   optional :number, type: Integer, desc: 'Number of shows'
         # end

@@ -1,12 +1,4 @@
 module API
-  module Entities
-    class Subscription < Grape::Entity
-      expose :id
-    end
-  end
-end
-
-module API
   module V1
     class Users < Grape::API
       version 'v1'
@@ -14,57 +6,79 @@ module API
       content_type :json, "application/json;charset=UTF-8"
       rescue_from :all
 
-      resource :users, desc: 'Users action' do
-        desc "Check authorization"
+      resource :users, desc: 'Действия, связанные с регистрацией/авторизацией' do
+        desc "Проверить авторизацию"
         params do
-          requires :phone, type: String, desc: 'Phone'
-          requires :key, type: String, desc: 'Key'
+          requires :phone, type: String, desc: 'Телефон'
+          requires :key, type: String, desc: 'Ключ'
         end
         post '/check_auth' do
           user = User.find_by(phone: params[:phone])
-          if user.key == params[:key]
-            present user.subscriptions, with: API::Entities::Subscription
+          if user
+            if user.key == params[:key]
+              present user.subscriptions, with: API::Entities::Subscription
+            else
+              present :error, 'wrong key'
+              status 401
+            end
           else
-            present
+            present :eror, 'user not found'
+            status 404
           end
         end
 
-        desc "Registration"
+        desc "Регистриация"
         params do
-          requires :phone, type: String, desc: 'Phone'
-          optional :show_id, type: Integer, desc: 'Show id'
-          optional :episode_id, type: Integer, desc: 'Episode id'
-          optional :episode, type: Boolean, desc: 'Na episod li podpiska'
+          requires :phone, type: String, desc: 'Телефон'
+          optional :show_id, type: Integer, desc: 'ID сериала'
+          optional :episode_id, type: Integer, desc: 'ID эпизода'
+          optional :subtype, type: String, desc: 'Тип подписки (episode, new_episodes, season)'
         end
         post '/register' do
           confirmation = rand(1000 .. 9999)
-          # if params[:subscription]
-          #   user.subscriptions.create(:show_id => params[:show_id], :episode => params[:episode], :three_episodes => params[:three_episodes])
-          # end 
-          
           user = User.where(phone: params[:phone]).first_or_create
+          if params[:show_id]
+            user.subscriptions.create(
+              show_id: params[:show_id],
+              episode_id: params[:episode_id],
+              subtype: params[:subtype],
+              active: false
+            )
+          end
           user.update(confirmation: confirmation)
-          u = URI.enconfirmation("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{params[:phone]}&message=#{confirmation}&sender=APPISODE")
+          u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{params[:phone]}&message=#{confirmation}&sender=APPISODE")
           Net::HTTP.get(URI(u))
           present :response, 'sms sended'
         end
 
 
-        desc "confirmation check"
+        desc "Проверка кода"
         params do
-          requires :phone, type: String, desc: 'Phone'
-          requires :confirmation, type: Integer, desc: 'confirmation'
+          requires :phone, type: String, desc: 'Телефон'
+          requires :confirmation, type: Integer, desc: 'Код'
         end
         post '/check_confirmation' do
           user = User.find_by(phone: params[:phone])
-          if user.confirmation == params[:confirmation]
-            key = SecureRandom.hex(20)
-            user.update(key: key)
+          puts params
+          if user
+            if user.confirmation == params[:confirmation]
+              key = SecureRandom.hex(20)
+              user.update(key: key)
+              subscriptions = user.subscriptions.where(active: false)
+              unless subscriptions.empty?
+               subscriptions.last.update(active: true)
+             end
 
-            present :key, key
-            present :subscriptions, user.subscriptions, with: API::Entities::Subscription
+              present :key, key
+              present :subscriptions, user.subscriptions, with: API::Entities::Subscription
+            else
+              user.subscriptions.where(active: false).delete_all
+              present :error, 'wrong confirmation'
+              status 401
+            end
           else
-            status 401
+            present :error, 'user not found'
+            status 404
           end
         end
       end
