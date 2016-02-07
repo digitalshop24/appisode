@@ -3,20 +3,6 @@ namespace :film_app do
   desc "Rake task to get events data"
 
   task load: :environment do
-    def Show.get_json(path, params)
-      api_key = '15e545fda3d4598527fac7245a459571'
-      url = 'http://api.themoviedb.org/3/tv'
-      get_params = params
-      get_params[:api_key] = api_key
-      uri = URI.escape("#{url}/#{path}?#{get_params.to_query}")
-      resp = open(uri).read
-      JSON.parse(resp)
-    end
-
-    def Show.image_url(image, format = 'w500')
-      "http://image.tmdb.org/t/p/#{format}#{image}"
-    end
-
     (1..1000).each do |i|
       shows = Show.get_json('popular', { page: i })['results']
       shows.each do |show|

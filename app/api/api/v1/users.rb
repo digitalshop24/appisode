@@ -62,12 +62,16 @@ module API
           puts params
           if user
             if user.confirmation == params[:confirmation]
-              key = SecureRandom.hex(20)
-              user.update(key: key)
+              key = user.key
+              unless key
+                key = SecureRandom.hex(20)
+                user.update(key: key)
+              end
+              
               subscriptions = user.subscriptions.where(active: false)
               unless subscriptions.empty?
-               subscriptions.last.update(active: true)
-             end
+                subscriptions.last.update(active: true)
+              end
 
               present :key, key
               present :subscriptions, user.subscriptions, with: API::Entities::Subscription
