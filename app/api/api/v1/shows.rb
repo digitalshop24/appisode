@@ -10,13 +10,13 @@ module API
       expose :name, documentation: { type: String, desc: "Название" }
       expose :russian_name, documentation: { type: String, desc: "Название на русском" }
       expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
-      # expose :next_episode, if: lambda { |object, options| object.next_episode }, 
+      # expose :next_episode, if: lambda { |object, options| object.next_episode },
       #    documentation: { type: String, desc: "Дата следующей серии" } do |show|
       #     show.next_episode.air_date
       # end
-      expose :next_episode, if: lambda { |object, options| object.next_episode }, 
-         documentation: { type: Episode, desc: "Next episode" }, using: API::Entities::Episode
-    end 
+      expose :next_episode, if: lambda { |object, options| object.next_episode },
+        documentation: { type: Episode, desc: "Next episode" }, using: API::Entities::Episode
+    end
   end
 end
 

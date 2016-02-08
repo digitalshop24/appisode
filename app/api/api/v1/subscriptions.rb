@@ -81,7 +81,7 @@ module API
           else
             present :error, 'user not found'
           end
-        end 
+        end
 
         desc "Отписаться"
         params do
@@ -96,7 +96,7 @@ module API
               sub = Subscription.find_by_id(params[:subscription_id])
               if sub
                 if sub.user_id == user.id
-                  sub.delete
+                  sub.destroy
                   present :response, 'unsubscribed'
                 else
                   present :error, "not user's subscription"
@@ -110,7 +110,7 @@ module API
           else
             present :error, 'user not found'
           end
-        end 
+        end
 
       end
 
