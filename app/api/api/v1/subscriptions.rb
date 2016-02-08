@@ -40,11 +40,9 @@ module API
               present user.subscriptions.where(active: true), with: API::Entities::Subscription
             else
               present :error, 'wrong key'
-              status 401
             end
           else
             present :error, 'not found'
-            status 404
           end
         end
 
@@ -73,19 +71,15 @@ module API
                   present sub, with: API::Entities::Subscription
                 else
                   present :error, 'episode not from this show'
-                  status 406
                 end
               else
                 present :error, 'episode or show not found'
-                status 404
               end
             else
               present :error, 'wrong key'
-              status 401
             end
           else
             present :error, 'user not found'
-            status 404
           end
         end 
 
@@ -106,19 +100,15 @@ module API
                   present :response, 'unsubscribed'
                 else
                   present :error, "not user's subscription"
-                  status 403
                 end
               else
                 present :error, 'subscription not found'
-                status 404
               end
             else
               present :error, 'wrong auth key'
-              status 401
             end
           else
             present :error, 'user not found'
-            status 404
           end
         end 
 

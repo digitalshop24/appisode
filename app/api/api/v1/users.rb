@@ -19,11 +19,9 @@ module API
               present user.subscriptions, with: API::Entities::Subscription
             else
               present :error, 'wrong key'
-              status 401
             end
           else
             present :eror, 'user not found'
-            status 404
           end
         end
 
@@ -78,11 +76,9 @@ module API
             else
               user.subscriptions.where(active: false).delete_all
               present :error, 'wrong confirmation'
-              status 401
             end
           else
             present :error, 'user not found'
-            status 404
           end
         end
       end
