@@ -54,7 +54,7 @@ module API
           optional :episode_id, type: Integer, desc: 'ID эпизода'
           requires :subtype, type: String, desc: 'Тип подписки (episode, new_episodes, season)'
         end
-        post '/subscribe' do
+        get '/subscribe' do
           user = User.find_by(phone: params[:phone])
           if user
             if user.key == params[:key]
@@ -89,7 +89,7 @@ module API
           requires :key, type: String, desc: 'Ключ'
           requires :subscription_id, type: Integer, desc: 'ID подписки'
         end
-        post '/unsubscribe' do
+        get '/unsubscribe' do
           user = User.find_by(phone: params[:phone])
           if user
             if user.key == params[:key]

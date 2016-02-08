@@ -12,7 +12,7 @@ module API
           requires :phone, type: String, desc: 'Телефон'
           requires :key, type: String, desc: 'Ключ'
         end
-        post '/check_auth' do
+        get '/check_auth' do
           user = User.find_by(phone: params[:phone])
           if user
             if user.key == params[:key]
@@ -32,7 +32,7 @@ module API
           optional :episode_id, type: Integer, desc: 'ID эпизода'
           optional :subtype, type: String, desc: 'Тип подписки (episode, new_episodes, season)'
         end
-        post '/register' do
+        get '/register' do
           confirmation = rand(1000 .. 9999)
           user = User.where(phone: params[:phone]).first_or_create
           if params[:show_id]
@@ -55,7 +55,7 @@ module API
           requires :phone, type: String, desc: 'Телефон'
           requires :confirmation, type: Integer, desc: 'Код'
         end
-        post '/check_confirmation' do
+        get '/check_confirmation' do
           user = User.find_by(phone: params[:phone])
           puts params
           if user
