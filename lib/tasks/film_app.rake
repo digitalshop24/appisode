@@ -33,6 +33,12 @@ namespace :film_app do
     end
   end
 
+  task :inform => :environment do
+    Show.where(in_production: true).each do |show|
+      if (show.next_episode.air_date == Time.now)
+    end
+  end
+
   task :download => :environment do
     Tmdb::Api.key('15e545fda3d4598527fac7245a459571')
     def on_air?(date)

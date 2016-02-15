@@ -1,8 +1,9 @@
 module API
   module Entities
     class Episode < Grape::Entity
-      expose :id, documentation: {type: Integer,  desc: "ID эпизода"}
-      expose :air_date, documentation: {type: Integer,  desc: "Дата выхода эпизода"}
+      expose :id, documentation: {type: Integer,  desc: "ID серии"}
+      expose :number, documentation: {type: Integer,  desc: "Номер серии"}
+      expose :air_date, documentation: {type: Integer,  desc: "Дата выхода серии"}
       expose :aired, documentation: {type: 'Boolean', desc: 'Вышел ли уже'} do |e|
         e.air_date < Time.now
       end
@@ -13,6 +14,9 @@ module API
       expose :name, documentation: { type: String, desc: "Название" }
       expose :russian_name, documentation: { type: String, desc: "Название на русском" }
       expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
+      expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |s|
+        s.seasons.last.number
+      end
       # expose :next_episode, if: lambda { |object, options| object.next_episode },
       #    documentation: { type: String, desc: "Дата следующей серии" } do |show|
       #     show.next_episode.air_date
@@ -21,9 +25,6 @@ module API
         documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
     end
     class Show < ShowPreview
-      expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |s|
-        s.seasons.last.number
-      end
       expose :episodes, documentation: { type: Episode, desc: "Серии последнего сезона" }, using: API::Entities::Episode do |s|
         s.seasons.last.episodes.order(air_date: :asc)
       end
