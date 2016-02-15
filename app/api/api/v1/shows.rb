@@ -3,6 +3,9 @@ module API
     class Episode < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID эпизода"}
       expose :air_date, documentation: {type: Integer,  desc: "Дата выхода эпизода"}
+      expose :aired, documentation: {type: 'Boolean', desc: 'Вышел ли уже'} do |e|
+        e.air_date < Time.now
+      end
     end
     class ShowPreview < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID"}
@@ -15,7 +18,15 @@ module API
       #     show.next_episode.air_date
       # end
       expose :next_episode, if: lambda { |object, options| object.next_episode },
-        documentation: { type: Episode, desc: "Next episode" }, using: API::Entities::Episode
+        documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
+    end
+    class Show < ShowPreview
+      expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |s|
+        s.seasons.last.number
+      end
+      expose :episodes, documentation: { type: Episode, desc: "Серии последнего сезона" }, using: API::Entities::Episode do |s|
+        s.seasons.last.episodes.order(air_date: :asc)
+      end
     end
   end
 end
@@ -61,12 +72,12 @@ module API
           present Show.search(params[:query]).paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
         end
 
-        desc "Сериал по id", entity: API::Entities::ShowPreview
+        desc "Сериал по id", entity: API::Entities::Show
         params do
           requires :id, type: Integer, desc: 'Id'
         end
         get '/:id' do
-          present Show.find(params[:id]), with: API::Entities::ShowPreview
+          present Show.find(params[:id]), with: API::Entities::Show
         end
       end
     end

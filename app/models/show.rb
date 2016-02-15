@@ -15,8 +15,9 @@ class Show < ActiveRecord::Base
 		begin
 		  resp = open(uri).read
     rescue => error
-      retry
       puts("ERROR ===>> #{error.class} and #{error.message}")
+      sleep(0.1)
+      retry
     end
 		JSON.parse(resp)
 	end

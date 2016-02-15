@@ -2,6 +2,7 @@ module API
   module Entities
     class Subscription < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID подписки"}
+      expose :show_id, documentation: {type: Integer, desc: 'ID сериала'}
       expose :name, documentation: {type: String, desc: 'Название сериала' } do |sub|
         sub.show.name
       end
