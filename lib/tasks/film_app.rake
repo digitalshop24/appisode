@@ -34,7 +34,14 @@ namespace :film_app do
   end
 
   task :inform => :environment do
-    Notification.where(date: Date.today).perform
+    begin
+      Notification.where(date: Date.today).each do |n|
+        n.perform
+      end
+      puts "#{Time.now} === notifications sended"
+    rescue => error
+      puts("ERROR ===>> #{error.class} and #{error.message}")
+    end
   end
 
   task :test => :environment do
