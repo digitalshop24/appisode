@@ -39,6 +39,7 @@ namespace :film_app do
 
   task :test => :environment do
     Show.create(name: 'test-test')
+    puts 'blalba'
   end
 
   task :download => :environment do

@@ -57,13 +57,13 @@ module API
               episode = Episode.find_by_id(params[:episode_id]) if params[:episode_id]
               if ((show && episode) || (show && !params[:episode_id]))
                 if (show.episodes.include?(episode) || !params[:episode_id])
-                  sub = user.subscriptions.where(
+                  subs = user.subscriptions.where(
                     show_id: params[:show_id],
                     episode_id: params[:episode_id],
                     subtype: params[:subtype],
                   )
-                  if sub.empty?
-                    sub = user.subscriptions.where(
+                  if subs.empty?
+                    sub = user.subscriptions.create(
                       show_id: params[:show_id],
                       episode_id: params[:episode_id],
                       subtype: params[:subtype],
