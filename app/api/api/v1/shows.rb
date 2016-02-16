@@ -57,9 +57,6 @@ module API
         end
 
         desc 'Популярные сериалы', entity: API::Entities::ShowPreview
-        # params do
-        #   optional :number, type: Integer, desc: 'Number of shows'
-        # end
         get '/popular' do
           present Show.popular, with: API::Entities::ShowPreview
         end

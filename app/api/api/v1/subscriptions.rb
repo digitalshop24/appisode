@@ -10,12 +10,6 @@ module API
         sub.show.poster
       end
       expose :subtype, documentation: {type: String, desc: 'Тип подписки' }
-      # expose :episode_date, if: lambda { |instance, options| options[:episode] }, documentation: {type: String, desc: 'Дата выхода серии'} do |sub|
-      #   sub.episode.air_date
-      # end
-      # expose :season_date, if: lambda { |instance, options| !options[:episode] }, documentation: {type: String, desc: 'Дата выхода сезона'} do |sub|
-      #   sub.show.seasons.last.episodes.last.air_date
-      # end
     end
   end
 end
@@ -63,13 +57,22 @@ module API
               episode = Episode.find_by_id(params[:episode_id]) if params[:episode_id]
               if ((show && episode) || (show && !params[:episode_id]))
                 if (show.episodes.include?(episode) || !params[:episode_id])
-                  sub = user.subscriptions.create(
+                  sub = user.subscriptions.where(
                     show_id: params[:show_id],
                     episode_id: params[:episode_id],
                     subtype: params[:subtype],
-                    active: true
                   )
-                  present sub, with: API::Entities::Subscription
+                  if sub.empty?
+                    sub = user.subscriptions.where(
+                      show_id: params[:show_id],
+                      episode_id: params[:episode_id],
+                      subtype: params[:subtype],
+                      active: true
+                    )
+                    present sub, with: API::Entities::Subscription
+                  else
+                    present :error, 'subscription already exists'
+                  end
                 else
                   present :error, 'episode not from this show'
                 end
