@@ -4,32 +4,65 @@ namespace :film_app do
 
   task load: :environment do
     (1..1000).each do |i|
-      shows = Show.get_json('popular', { page: i })['results']
-      shows.each do |show|
-        show = Show.get_json(show['id'], { language: 'ru' })
-        new_show = Show.where(tmdb_id: show['id']).first_or_create(
-          russian_name: show['name'],
-          name: show['original_name'],
-          poster: Show.image_url(show['poster_path']),
-          in_production: show['in_production']
-        )
-        show['seasons'].each do |season|
-          new_season = new_show.seasons.where(tmdb_id: season['id']).first_or_create(
-            number: season['season_number'],
-            poster: Show.image_url(season['poster_path'])
-          )
-          season = Show.get_json("#{new_show.tmdb_id}/season/#{new_season.number}", { language: 'ru' })
-          season['episodes'].each do |episode|
-            new_season.episodes.where(tmdb_id: episode['id']).first_or_create(
-              air_date: (Date.parse(episode["air_date"]) if episode["air_date"]),
-              number: episode['episode_number']
-            )
-          end
-          puts "------ #{Time.now} - season #{new_season.number} for \"#{new_show.name}\" loaded with #{season['episodes'].count} episodes"
+      shows = Show.get_json('popular', { page: i })
+      if shows
+        shows = shows['results']
+        shows.each do |show|
+          Show.load show['id']
         end
-        puts "--- #{Time.now} - show \"#{new_show.name}\" loaded"
       end
       puts "#{Time.now} - page #{i} done"
+    end
+  end
+
+  task load_all: :environment do
+    (1..64598).each do |i|
+      Show.load i
+    end
+  end
+
+  task update: :environment do
+    in_prod_shows = Show.where(in_production: true)
+    in_prod_shows.each_with_index do |show, i|
+      puts "#{i}/#{in_prod_shows.count}"
+      json = Show.get_json(show.tmdb_id, { language: 'ru' })
+      if json
+        new_seasons = json['seasons'].count - show.seasons.count
+        if new_seasons > 0
+          (json['seasons'].map{|s| s['season_number']} - show.seasons.pluck(:number)).each do |season_number|
+            season = Show.get_json("#{show.tmdb_id}/season/#{season_number}", { language: 'ru' })
+            if season
+              new_season = show.create_or_update_season(season)
+              season['episodes'].each do |episode|
+                new_episode = new_season.create_or_update_episode(episode)
+              end
+              puts "------ #{Time.now} - season #{new_season.number} for \"#{show.name}\" loaded with #{season['episodes'].count} episodes !!!!"
+            end
+          end
+        else
+          season = Show.get_json("#{show.tmdb_id}/season/#{json['seasons'].last['season_number']}", { language: 'ru' })
+          if season
+            new_season = show.create_or_update_season(season)
+            new_episodes = season['episodes'].count - new_season.episodes.count
+            if new_episodes > 0
+              old_episodes = new_season.episodes.where('air_date < ?', Date.today).pluck(:number)
+              season['episodes'].each do |episode|
+                unless episode['episode_number'].in? old_episodes
+                  exist_ep = Episode.find_by(tmdb_id: episode['id'])
+                  if !exist_ep && exist_ep.air_date != Date.parse(episode['air_date'])
+                    new_episode = new_season.create_or_update_episode(episode)
+                    # show.subscriptions.new_episodes.each do |s|                      
+                    #   notif = s.notifications.map {|n| n.update() }
+                    # end
+                  end
+                end
+              end
+            end
+            puts "------ #{Time.now} - season #{new_season.number} for \"#{show.name}\" updated. #{new_episodes} episodes added"
+          end
+        end
+        puts "--- #{Time.now} - show \"#{show.name}\" updated. #{new_seasons} seasons added"
+      end
     end
   end
 
@@ -113,56 +146,56 @@ namespace :film_app do
     puts "#{Time.now} - FINISH!!!"
   end
 
-  desc "for updates for subscriptions"
-  task :update => :environment do
-    current_date = Date.parse(Time.now.to_s.slice(0..9))
-    User.all.each do |i|
-      if i.updated.nil? || i.updated != current_date
-        i.subscriptions.each do |j|
-          if Show.find(j.serial_id).season_date
-            season_release_date = Date.parse(Show.find(j.serial_id).season_date)
-            if season_release_date >= current_date
-              if j.options['season']
-                if Show.find(j.serial_id).season_date
-                  if season_release_date == current_date
-                    #TODO send email with serial name and season released text
-                    u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=новый сезон сериала #{Show.find(j.serial_id).russian_name} вышел&sender=APPISODE")
-                    uri = URI(u)
-                    a = Net::HTTP.get(uri)
-                    puts "#{i.email}"
-                  end
-                end
-              end
-              if j.options['episode']
-                if Show.find(j.serial_id).episode_date
-                  episode_release_date = Date.parse(Show.find(j.serial_id).episode_date)
-                  if episode_release_date == current_date
-                    #TODO send email with serial name and episode released text
-                    u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=новая серия сериала #{Show.find(j.serial_id).russian_name} вышла&sender=APPISODE")
-                    uri = URI(u)
-                    a = Net::HTTP.get(uri)
-                    puts "#{i.email} recieved episode announce about #{Show.find(j.serial_id).additional_field} #{a}"
-                  end
-                end
-              end
-              if j.options['three_episode']
-                if Show.find(j.serial_id).three_episode
-                  three_episode_release_date = Date.parse(Show.find(j.serial_id).three_episode)
-                  if three_episode_release_date == current_date
-                    #TODO send email with serial name and three_episodes released text
-                    u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=три серии сериала #{Show.find(j.serial_id).russian_name} вышли&sender=APPISODE")
-                    uri = URI(u)
-                    a = Net::HTTP.get(uri)
-                    puts "#{i.email} recieved three_episodes announce about #{Show.find(j.serial_id).additional_field} #{a}"
-                  end
-                end
-              end
-            end
-          end
-        end
-        i.updated = current_date
-        i.save
-      end
-    end
-  end
+  # desc "for updates for subscriptions"
+  # task :update => :environment do
+  #   current_date = Date.parse(Time.now.to_s.slice(0..9))
+  #   User.all.each do |i|
+  #     if i.updated.nil? || i.updated != current_date
+  #       i.subscriptions.each do |j|
+  #         if Show.find(j.serial_id).season_date
+  #           season_release_date = Date.parse(Show.find(j.serial_id).season_date)
+  #           if season_release_date >= current_date
+  #             if j.options['season']
+  #               if Show.find(j.serial_id).season_date
+  #                 if season_release_date == current_date
+  #                   #TODO send email with serial name and season released text
+  #                   u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=новый сезон сериала #{Show.find(j.serial_id).russian_name} вышел&sender=APPISODE")
+  #                   uri = URI(u)
+  #                   a = Net::HTTP.get(uri)
+  #                   puts "#{i.email}"
+  #                 end
+  #               end
+  #             end
+  #             if j.options['episode']
+  #               if Show.find(j.serial_id).episode_date
+  #                 episode_release_date = Date.parse(Show.find(j.serial_id).episode_date)
+  #                 if episode_release_date == current_date
+  #                   #TODO send email with serial name and episode released text
+  #                   u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=новая серия сериала #{Show.find(j.serial_id).russian_name} вышла&sender=APPISODE")
+  #                   uri = URI(u)
+  #                   a = Net::HTTP.get(uri)
+  #                   puts "#{i.email} recieved episode announce about #{Show.find(j.serial_id).additional_field} #{a}"
+  #                 end
+  #               end
+  #             end
+  #             if j.options['three_episode']
+  #               if Show.find(j.serial_id).three_episode
+  #                 three_episode_release_date = Date.parse(Show.find(j.serial_id).three_episode)
+  #                 if three_episode_release_date == current_date
+  #                   #TODO send email with serial name and three_episodes released text
+  #                   u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{i.number}&message=три серии сериала #{Show.find(j.serial_id).russian_name} вышли&sender=APPISODE")
+  #                   uri = URI(u)
+  #                   a = Net::HTTP.get(uri)
+  #                   puts "#{i.email} recieved three_episodes announce about #{Show.find(j.serial_id).additional_field} #{a}"
+  #                 end
+  #               end
+  #             end
+  #           end
+  #         end
+  #       end
+  #       i.updated = current_date
+  #       i.save
+  #     end
+  #   end
+  # end
 end
