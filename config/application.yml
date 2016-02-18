@@ -4,6 +4,10 @@
    api_key: '15e545fda3d4598527fac7245a459571'
    client_id: '283921014541-5av2m7btqn6au830qrjostaks735bck5.apps.googleusercontent.com'
    client_secret: 'z1V9RcctGSMQ766GlEWw9xlI'
+
+   ionic_secret_key: '519cd1b685a0e5926774b1a342e4bfa77f46310d41564116'
+   ionic_app_id: '90c49f80'
+
    database_username: 'postgres'
    database_password: 'dshop24'
  development:

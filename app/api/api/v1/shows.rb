@@ -7,7 +7,7 @@ module API
       expose :aired, documentation: {type: 'Boolean', desc: 'Вышел ли уже'} do |e|
         e.air_date < Time.now
       end
-      expose :days_left
+      expose :days_left, documentation: {type: Integer, desc: 'Дней до выхода серии'}
     end
     class ShowPreview < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID"}

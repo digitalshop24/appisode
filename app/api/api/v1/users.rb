@@ -65,7 +65,7 @@ module API
                 key = SecureRandom.hex(20)
                 user.update(key: key)
               end
-              
+
               subscriptions = user.subscriptions.where(active: false)
               unless subscriptions.empty?
                 subscriptions.last.update(active: true)
@@ -80,6 +80,28 @@ module API
           else
             present :error, 'user not found'
           end
+        end
+
+        desc "Получение PUSH токена"
+        params do
+          # requires :phone, type: String, desc: 'Телефон'
+          # requires :key, type: String, desc: 'Ключ'
+          requires :token, type: String, desc: 'PUSH токен'
+        end
+        get '/save_token' do
+          present Notification.push(params[:token])
+          # User.create(token: params[:token])
+          # user = User.find_by(phone: params[:phone])
+          # if user
+          #   if user.key == params[:key]
+          #     user.update(token: params[:token])
+          #     present :response, 'token saved'
+          #   else
+          #     present :error, 'wrong key'
+          #   end
+          # else
+          #   present :eror, 'user not found'
+          # end
         end
       end
     end
