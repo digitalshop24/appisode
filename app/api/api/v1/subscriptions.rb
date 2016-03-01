@@ -3,6 +3,7 @@ module API
     class Subscription < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID подписки"}
       expose :show_id, documentation: {type: Integer, desc: 'ID сериала'}
+      expose :episode_id, documentation: {type: Integer, desc: 'ID серии'}
       expose :name, documentation: {type: String, desc: 'Название сериала' } do |sub|
         sub.show.name
       end
@@ -58,9 +59,7 @@ module API
               if ((show && episode) || (show && !params[:episode_id]))
                 if (show.episodes.include?(episode) || !params[:episode_id])
                   subs = user.subscriptions.where(
-                    show_id: params[:show_id],
-                    episode_id: params[:episode_id],
-                    subtype: params[:subtype],
+                    show_id: params[:show_id]
                   )
                   if subs.empty?
                     sub = user.subscriptions.create(
@@ -71,7 +70,7 @@ module API
                     )
                     present sub, with: API::Entities::Subscription
                   else
-                    present :error, 'subscription already exists'
+                    present :error, 'subscription to this show already exists'
                   end
                 else
                   present :error, 'episode not from this show'
@@ -91,13 +90,14 @@ module API
         params do
           requires :phone, type: String, desc: 'Телефон'
           requires :key, type: String, desc: 'Ключ'
-          requires :subscription_id, type: Integer, desc: 'ID подписки'
+          optional :subscription_id, type: Integer, desc: 'ID подписки'
+          optional :show_id, type: Integer, desc: 'ID сериала'
         end
         get '/unsubscribe' do
           user = User.find_by(phone: params[:phone])
           if user
             if user.key == params[:key]
-              sub = Subscription.find_by_id(params[:subscription_id])
+              sub = Subscription.find_by_id(params[:subscription_id]) || Subscription.find_by_show_id(params[:show_id])
               if sub
                 if sub.user_id == user.id
                   sub.destroy

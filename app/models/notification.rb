@@ -27,7 +27,7 @@ class Notification < ActiveRecord::Base
     request.basic_auth(ENV['ionic_secret_key'], '')
     request["Content-Type"] = 'application/json'
     request["X-Ionic-Application-Id"] = ENV['ionic_app_id']
-    request.body = '{"tokens": ["' + token + '"],"notification":{"alert":"Hello world."}}'
+    request.body = {tokens: [token], notification: {alert: "hello world"}}.to_json
     response = http.request(request)
     JSON.parse response.body
   end

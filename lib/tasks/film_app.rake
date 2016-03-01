@@ -48,13 +48,7 @@ namespace :film_app do
               old_episodes = new_season.episodes.where('air_date < ?', Date.today).pluck(:number)
               season['episodes'].each do |episode|
                 unless episode['episode_number'].in? old_episodes
-                  exist_ep = Episode.find_by(tmdb_id: episode['id'])
-                  if !exist_ep && exist_ep.air_date != Date.parse(episode['air_date'])
-                    new_episode = new_season.create_or_update_episode(episode)
-                    # show.subscriptions.new_episodes.each do |s|                      
-                    #   notif = s.notifications.map {|n| n.update() }
-                    # end
-                  end
+                  new_episode = new_season.create_or_update_episode(episode)
                 end
               end
             end
@@ -66,7 +60,7 @@ namespace :film_app do
     end
   end
 
-  task :inform => :environment do
+  task inform: :environment do
     begin
       Notification.where(date: Date.today).each do |n|
         n.perform

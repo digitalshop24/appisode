@@ -47,6 +47,12 @@ class Show < ActiveRecord::Base
     ids = get_json('popular')['results'].map{|s| s['id']}
     where(tmdb_id: ids)
   end
+
+  def self.new_shows
+    Show.where('shows.in_production = ? AND episodes.air_date > ?', true, Date.today).
+      joins(seasons: [:episodes]).group('shows.id').having('count(seasons.id) < ?', 3)
+  end
+  
   def self.create_or_update show
     new_show = Show.find_or_create_by(tmdb_id: show['id'])
     new_show.update(
