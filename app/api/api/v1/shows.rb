@@ -40,6 +40,10 @@ module API
       format :json
       content_type :json, "application/json;charset=UTF-8"
       rescue_from :all
+      rescue_from ActiveRecord::RecordNotFound do |e|
+        error!({ ru: "Такая запись не найдена", en: "This record does not exists" }, 404)
+      end
+      error_formatter :json, ::API::ErrorFormatter
 
       helpers do
         params :pagination do
@@ -54,12 +58,16 @@ module API
           use :pagination
         end
         get do
-          present Show.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
+          shows = Show.all
+          present :total, shows.count
+          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
         end
 
         desc 'Популярные сериалы', entity: API::Entities::ShowPreview
         get '/popular' do
-          present Show.popular, with: API::Entities::ShowPreview
+          shows = Show.popular
+          present :total, shows.count
+          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
         end
 
         desc "Поиск сериала", entity: API::Entities::ShowPreview
@@ -68,7 +76,9 @@ module API
           requires :query, type: String, desc: 'Запрос'
         end
         get '/search' do
-          present Show.search(params[:query]).paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
+          shows = Show.search(params[:query])
+          present :total, shows.count
+          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
         end
 
         desc "Сериал по id", entity: API::Entities::Show
