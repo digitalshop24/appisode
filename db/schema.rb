@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160301093746) do
+ActiveRecord::Schema.define(version: 20160304102443) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -55,8 +55,9 @@ ActiveRecord::Schema.define(version: 20160301093746) do
     t.string   "russian_name"
     t.integer  "tmdb_id"
     t.integer  "number_of_seasons"
-    t.datetime "created_at",        null: false
-    t.datetime "updated_at",        null: false
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
+    t.float    "popularity",        default: 1000.0
   end
 
   create_table "subscriptions", force: :cascade do |t|

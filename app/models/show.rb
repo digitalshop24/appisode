@@ -43,16 +43,20 @@ class Show < ActiveRecord::Base
   def self.image_url(image, format = 'w500')
     "http://image.tmdb.org/t/p/#{format}#{image}"
   end
+
+  def self.airing
+    where('shows.in_production = ? AND episodes.air_date > ?', true, Date.today).
+      joins(seasons: [:episodes]).group('shows.id')
+  end
+
   def self.popular
-    ids = get_json('popular')['results'].map{|s| s['id']}
-    where(tmdb_id: ids)
+    airing.order(popularity: :asc).limit(100)
   end
 
   def self.new_shows
-    Show.where('shows.in_production = ? AND episodes.air_date > ?', true, Date.today).
-      joins(seasons: [:episodes]).group('shows.id').having('count(seasons.id) < ?', 3)
+    airing.having('count(seasons.id) < ?', 3).order(popularity: :asc).limit(100)
   end
-  
+
   def self.create_or_update show
     new_show = Show.find_or_create_by(tmdb_id: show['id'])
     new_show.update(

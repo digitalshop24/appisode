@@ -9,12 +9,14 @@ module API
       end
       expose :days_left, documentation: {type: Integer, desc: 'Дней до выхода серии'}
     end
-    class ShowPreview < Grape::Entity
+    class ShowShort < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID"}
       expose :poster, documentation: { type: String, desc: "Постер" }
       expose :name, documentation: { type: String, desc: "Название" }
       expose :russian_name, documentation: { type: String, desc: "Название на русском" }
       expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
+    end
+    class ShowPreview < ShowShort
       expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |s|
         s.seasons.last.number
       end
@@ -24,7 +26,7 @@ module API
       # end
       expose :next_episode, if: lambda { |object, options| object.next_episode },
         documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
-    end
+    end    
     class Show < ShowPreview
       expose :episodes, documentation: { type: Episode, desc: "Серии последнего сезона" }, using: API::Entities::Episode do |s|
         s.seasons.last.episodes.order(air_date: :asc)
@@ -60,6 +62,11 @@ module API
         desc 'Популярные сериалы', entity: API::Entities::ShowPreview
         get '/popular' do
           present Show.popular, with: API::Entities::ShowPreview
+        end
+
+        desc 'Новые сериалы', entity: API::Entities::ShowPreview
+        get '/new' do
+          present Show.new_shows, with: API::Entities::ShowPreview
         end
 
         desc "Поиск сериала", entity: API::Entities::ShowPreview

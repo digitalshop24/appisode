@@ -17,7 +17,11 @@ namespace :film_app do
 
   task load_all: :environment do
     (1..64598).each do |i|
-      Show.load i
+      begin
+        Show.load i
+      rescue => error
+        puts "ERROR #{error}"
+      end
     end
   end
 
@@ -57,6 +61,21 @@ namespace :film_app do
         end
         puts "--- #{Time.now} - show \"#{show.name}\" updated. #{new_seasons} seasons added"
       end
+    end
+  end
+
+  task update_popularity: :environment do
+    pages = 100
+    per_page = 20
+    arr = []
+    (1..pages).each do |i|
+      Show.get_json('popular', { page: i })['results'].each_with_index do |s, j|
+        # popularity = (per_page * pages - (per_page * (i - 1) + j)) * 20
+        popularity = per_page * (i - 1) + (j + 1)
+        show = Show.find_by(tmdb_id: s['id']) || Show.create_or_update(s)
+        show.update(popularity: popularity )
+      end
+      puts "#{i} pages done"
     end
   end
 
