@@ -18,7 +18,7 @@ module API
     end
     class ShowPreview < ShowShort
       expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |s|
-        s.seasons.last.number
+        s.seasons.last.number if s.seasons.last
       end
       # expose :next_episode, if: lambda { |object, options| object.next_episode },
       #    documentation: { type: String, desc: "Дата следующей серии" } do |show|
@@ -38,21 +38,7 @@ end
 module API
   module V1
     class Shows < Grape::API
-      version 'v1'
-      format :json
-      content_type :json, "application/json;charset=UTF-8"
-      rescue_from :all
-      rescue_from ActiveRecord::RecordNotFound do |e|
-        error!({ ru: "Такая запись не найдена", en: "This record does not exists" }, 404)
-      end
-      error_formatter :json, ::API::ErrorFormatter
-
-      helpers do
-        params :pagination do
-          optional :page, type: Integer, desc: 'Номер страницы'
-          optional :per_page, type: Integer, desc: 'На странице'
-        end
-      end
+      helpers SharedParams
 
       resource :shows, desc: 'Cериалы' do
         desc "Список всех сериалов", entity: API::Entities::ShowPreview
@@ -66,15 +52,20 @@ module API
         end
 
         desc 'Популярные сериалы', entity: API::Entities::ShowPreview
+        params do
+          use :pagination
+        end
         get '/popular' do
           shows = Show.popular
-          present :total, shows.count
-          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
+          present :total, shows.count.count
+          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview, 
         end
 
         desc 'Новые сериалы', entity: API::Entities::ShowPreview
         get '/new' do
-          present Show.new_shows, with: API::Entities::ShowPreview
+          shows = Show.new_shows
+          present :total, shows.count.count
+          present shows, with: API::Entities::ShowPreview
         end
 
         desc "Поиск сериала", entity: API::Entities::ShowPreview

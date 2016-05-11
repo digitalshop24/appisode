@@ -18,10 +18,10 @@ module API
             if user.key == params[:key]
               present user.subscriptions, with: API::Entities::Subscription
             else
-              present :error, 'wrong key'
+              error!({ ru: "Неверный ключ авторизации", en: "Wrong auth key" }, 401)
             end
           else
-            present :eror, 'user not found'
+            error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
           end
         end
 
@@ -44,11 +44,17 @@ module API
             )
           end
           user.update(confirmation: confirmation)
-          u = URI.encode("https://userarea.sms-assistent.by/api/v1/send_sms/plain?user=Iksboks&password=cS6888b5&recipient=#{params[:phone]}&message=#{confirmation}&sender=APPISODE")
-          Net::HTTP.get(URI(u))
-          present :response, 'sms sended'
-        end
 
+          sms = SmsAssistent.new.send(params[:phone], confirmation)
+          info = sms.info
+          if sms.status == 'ok'
+            present :status, 'ok'
+            present :en_message, info[:en]
+            present :message, info[:ru]
+          else
+            error!({ ru: info[:ru], en: info[:en] }, info[:code])
+          end
+        end
 
         desc "Проверка кода"
         params do
@@ -75,10 +81,10 @@ module API
               present :subscriptions, user.subscriptions, with: API::Entities::Subscription
             else
               user.subscriptions.where(active: false).delete_all
-              present :error, 'wrong confirmation'
+              error!({ ru: "Неверный код подтверждения", en: "Wrong confirmation" }, 401)
             end
           else
-            present :error, 'user not found'
+            error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
           end
         end
 

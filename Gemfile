@@ -21,9 +21,10 @@ gem 'jbuilder', '~> 1.2'
 gem 'figaro', '~> 1.1', '>= 1.1.1'
 gem 'themoviedb'
 gem 'pg'
-gem 'pry'
 gem 'sendgrid'
 gem 'whenever', :require => false
+gem 'rack-cors', :require => 'rack/cors'
+
 group :doc do
   gem 'sdoc', require: false
 end
@@ -38,6 +39,7 @@ group :production do
 end
 
 group :development do
+  gem 'pry'
   gem 'capistrano', '~> 3.4.0'
   gem 'capistrano-rails'
   gem 'capistrano-bundler'

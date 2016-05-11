@@ -37,10 +37,10 @@ module API
             if user.key == params[:key]
               present user.subscriptions.where(active: true), with: API::Entities::Subscription
             else
-              present :error, 'wrong key'
+              error!({ ru: "Неверный ключ авторизации", en: "Wrong auth key" }, 401)
             end
           else
-            present :error, 'not found'
+            error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
           end
         end
 
@@ -72,19 +72,19 @@ module API
                     )
                     present sub, with: API::Entities::Subscription
                   else
-                    present :error, 'subscription to this show already exists'
+                    error!({ ru: "Такая подписка уже существует", en: "Subscription to this show already exists" }, 406)
                   end
                 else
-                  present :error, 'episode not from this show'
+                  error!({ ru: "Серия не из этого сериала", en: "Episode not from this show" }, 406)
                 end
               else
-                present :error, 'episode or show not found'
+                error!({ ru: "Сериал или серия не найдены", en: "Episode or show not found" }, 404)
               end
             else
-              present :error, 'wrong key'
+              error!({ ru: "Неверный ключ авторизации", en: "Wrong auth key" }, 401)
             end
           else
-            present :error, 'user not found'
+            error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
           end
         end
 
@@ -103,18 +103,20 @@ module API
               if sub
                 if sub.user_id == user.id
                   sub.destroy
-                  present :response, 'unsubscribed'
+                  present :status, 'ok'
+                  present :en_message, 'Unsubscribed'
+                  present :message, 'Отписка выполнена'
                 else
-                  present :error, "not user's subscription"
+                  error!({ ru: "Подписка не принадлежит этому пользователю", en: "Not user's subscription" }, 406)
                 end
               else
-                present :error, 'subscription not found'
+                error!({ ru: "Подписка не найдена", en: "Subscription not found" }, 404)
               end
             else
-              present :error, 'wrong auth key'
+              error!({ ru: "Неверный ключ авторизации", en: "Wrong auth key" }, 401)
             end
           else
-            present :error, 'user not found'
+            error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
           end
         end
 
