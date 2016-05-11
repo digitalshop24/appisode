@@ -62,10 +62,13 @@ module API
         end
 
         desc 'Новые сериалы', entity: API::Entities::ShowPreview
+        params do
+          use :pagination
+        end
         get '/new' do
           shows = Show.new_shows
           present :total, shows.count.count
-          present :shows, shows, with: API::Entities::ShowPreview
+          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
         end
 
         desc "Поиск сериала", entity: API::Entities::ShowPreview
