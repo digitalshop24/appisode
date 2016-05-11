@@ -65,7 +65,7 @@ module API
         get '/new' do
           shows = Show.new_shows
           present :total, shows.count.count
-          present shows, with: API::Entities::ShowPreview
+          present :shows, shows, with: API::Entities::ShowPreview
         end
 
         desc "Поиск сериала", entity: API::Entities::ShowPreview
