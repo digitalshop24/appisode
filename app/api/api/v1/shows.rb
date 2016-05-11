@@ -58,7 +58,7 @@ module API
         get '/popular' do
           shows = Show.popular
           present :total, shows.count.count
-          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview, 
+          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
         end
 
         desc 'Новые сериалы', entity: API::Entities::ShowPreview
