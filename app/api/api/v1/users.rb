@@ -111,7 +111,7 @@ module API
         desc "Тестирование уведомления"
         params do
           requires :token, type: String, desc: 'PUSH токен'
-          optionsl :message, type: String, desc: 'Текст уведомления'
+          optional :message, type: String, desc: 'Текст уведомления'
         end
         get '/test_push' do
           gcm = GCM.new(ENV['GCM_API_KEY'])
