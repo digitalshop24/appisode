@@ -24,6 +24,8 @@ gem 'pg'
 gem 'sendgrid'
 gem 'whenever', :require => false
 gem 'rack-cors', :require => 'rack/cors'
+gem 'faker', '~> 1.6', '>= 1.6.3'
+gem 'gcm', '~> 0.1.1'
 
 group :doc do
   gem 'sdoc', require: false

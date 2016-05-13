@@ -1,0 +1,8 @@
+en:
+  notifications:
+    episode:
+      today: "Today %{number} episode of show \"%{show}\" is airing"
+    new_episodes:
+      today: "Today new episode of show \"%{show}\" is airing"
+    season:
+      today: "Today the last season episode of show \"%{show}\""

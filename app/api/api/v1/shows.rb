@@ -17,16 +17,18 @@ module API
       expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
     end
     class ShowPreview < ShowShort
-      expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |s|
-        s.seasons.last.number if s.seasons.last
-      end
+      # expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |s|
+      #   s.seasons.last.try(:number)
+      # end
+      expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" }
       # expose :next_episode, if: lambda { |object, options| object.next_episode },
       #    documentation: { type: String, desc: "Дата следующей серии" } do |show|
       #     show.next_episode.air_date
       # end
-      expose :next_episode, if: lambda { |object, options| object.next_episode },
-        documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
-    end    
+      # expose :next_episode, if: lambda { |object, options| object.next_episode },
+      #   documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
+      expose :next_episode, documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
+    end
     class Show < ShowPreview
       expose :episodes, documentation: { type: Episode, desc: "Серии последнего сезона" }, using: API::Entities::Episode do |s|
         s.seasons.last.episodes.order(air_date: :asc)
@@ -46,9 +48,11 @@ module API
           use :pagination
         end
         get do
-          shows = Show.all
-          present :total, shows.count
-          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
+          shows = Show.select('shows.*, MAX(seasons.number) AS season_number').
+            joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id").group('shows.id').
+            preload(:one_next_episode).paginate(page: params[:page], per_page: params[:per_page])
+          present :total, shows.total_entries
+          present :shows, shows, with: API::Entities::ShowPreview
         end
 
         desc 'Популярные сериалы', entity: API::Entities::ShowPreview

@@ -2,6 +2,10 @@ require 'open-uri'
 class Show < ActiveRecord::Base
   has_many :seasons
   has_many :subscriptions
+  has_many :episodes, through: :seasons
+  has_many :upcoming_episodes, -> { where('episodes.air_date > ?', Time.now).order(air_date: :asc) }, through: :seasons, class_name: "Episode", source: :episodes
+  has_many :one_next_episode, -> { where('episodes.air_date > ?', Time.now).order(air_date: :asc).limit(1) }, through: :seasons, class_name: "Episode", source: :episodes
+
   # default_scope { order('created_at DESC') }
   def self.search(query)
     where('lower(name) like lower(:query) or lower(russian_name) like lower(:query)', { query: "%#{query}%" })
@@ -75,14 +79,20 @@ class Show < ActiveRecord::Base
     )
     new_season
   end
-  def episodes
-    ids = seasons.pluck(:id)
-    Episode.where(season_id: ids)
-  end
-  def upcoming_episodes
-    episodes.where('air_date > ?', Time.now).order(air_date: :asc)
-  end
+  # def episodes
+  #   ids = seasons.pluck(:id)
+  #   Episode.where(season_id: ids)
+  # end
+  # def upcoming_episodes
+  #   episodes.where('air_date > ?', Time.now).order(air_date: :asc)
+  # end
+  # def next_episode0
+  #   episodes.where('air_date > ?', Time.now).order(air_date: :asc).first
+  # end
   def next_episode
-    episodes.where('air_date > ?', Time.now).order(air_date: :asc).first
+    one_next_episode.first
   end
+  # def next_episode
+  #   Episode.joins(:season).where('seasons.show_id = ? AND episodes.air_date > ?', id, Time.now).order(air_date: :asc).limit(1).first
+  # end
 end

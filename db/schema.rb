@@ -11,10 +11,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160304102443) do
+ActiveRecord::Schema.define(version: 20160513110324) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "devices", force: :cascade do |t|
+    t.integer  "user_id"
+    t.string   "token"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "devices", ["user_id"], name: "index_devices_on_user_id", using: :btree
 
   create_table "episodes", force: :cascade do |t|
     t.integer  "season_id"
@@ -31,8 +40,9 @@ ActiveRecord::Schema.define(version: 20160304102443) do
     t.integer  "subscription_id"
     t.date     "date"
     t.string   "message"
-    t.datetime "created_at",      null: false
-    t.datetime "updated_at",      null: false
+    t.datetime "created_at",                      null: false
+    t.datetime "updated_at",                      null: false
+    t.boolean  "performed",       default: false, null: false
   end
 
   add_index "notifications", ["subscription_id"], name: "index_notifications_on_subscription_id", using: :btree
@@ -77,12 +87,12 @@ ActiveRecord::Schema.define(version: 20160304102443) do
     t.string   "name"
     t.integer  "confirmation"
     t.string   "phone"
-    t.string   "key"
+    t.string   "auth_token",   null: false
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
-    t.string   "token"
   end
 
+  add_foreign_key "devices", "users"
   add_foreign_key "episodes", "seasons"
   add_foreign_key "notifications", "subscriptions"
   add_foreign_key "seasons", "shows"

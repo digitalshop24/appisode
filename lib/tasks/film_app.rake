@@ -2,8 +2,9 @@ require 'open-uri'
 namespace :film_app do
   desc "Rake task to get events data"
 
-  task load: :environment do
-    (1..1000).each do |i|
+  task :load, [:pages] => :environment do |t, args|
+    pages = args[:pages] ? args[:pages].to_i : 1000
+    (1..pages).each do |i|
       shows = Show.get_json('popular', { page: i })
       if shows
         shows = shows['results']
@@ -64,7 +65,8 @@ namespace :film_app do
     end
   end
 
-  task update_popularity: :environment do
+  task :update_popularity, [:pages] => :environment do |t, args|
+    pages = args[:pages] ? args[:pages].to_i : 100
     pages = 100
     per_page = 20
     arr = []
@@ -79,7 +81,7 @@ namespace :film_app do
     end
   end
 
-  task inform: :environment do
+  task inform_old: :environment do
     begin
       Notification.where(date: Date.today).each do |n|
         n.perform
@@ -88,6 +90,33 @@ namespace :film_app do
     rescue => error
       puts("ERROR ===>> #{error.class} and #{error.message}")
     end
+  end
+
+  task inform: :enviroment do
+    # current episode subscriptions
+    Subscription.episode.select('*, episodes.number AS episode_number, shows.name AS show_name, shows.russian_name AS show_ru_name').joins(:episode).where('episodes.air_date' => Date.today) do |sub|
+      nt = Notification.create(
+        subscription: sub,
+        message: I18n.t('notifications.episode.today', number: sub.episode_number, show: sub.show_ru_name)
+      )
+      nt.update(performed: true) if nt.perform
+    end
+    # all new episodes subscriptions
+    Subscription.new_episodes.select('*, shows.name AS show_name, shows.russian_name AS show_ru_name').joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today) do |sub|
+      nt = Notification.create(
+        subscription: sub,
+        message: I18n.t('notifications.new_episodes.today', show: sub.show_ru_name)
+      )
+      nt.update(performed: true) if nt.perform
+    end
+    # season subscriptions
+    # Subscription.season.joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today) do |sub|
+    #   nt = Notification.create(
+    #     subscription: sub,
+    #     message: I18n.t('notifications.new_episodes.today')
+    #   )
+    #   nt.update(performed: true) if nt.perform
+    # end
   end
 
   task :test => :environment do

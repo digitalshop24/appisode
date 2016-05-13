@@ -34,7 +34,7 @@ module API
         get do
           user = User.find_by(phone: params[:phone])
           if user
-            if user.key == params[:key]
+            if user.auth_token == params[:key]
               present user.subscriptions.where(active: true), with: API::Entities::Subscription
             else
               error!({ ru: "Неверный ключ авторизации", en: "Wrong auth key" }, 401)
@@ -55,7 +55,7 @@ module API
         get '/subscribe' do
           user = User.find_by(phone: params[:phone])
           if user
-            if user.key == params[:key]
+            if user.auth_token == params[:key]
               show = Show.find_by_id(params[:show_id])
               episode = Episode.find_by_id(params[:episode_id]) if params[:episode_id]
               if ((show && episode) || (show && !params[:episode_id]))
@@ -98,7 +98,7 @@ module API
         get '/unsubscribe' do
           user = User.find_by(phone: params[:phone])
           if user
-            if user.key == params[:key]
+            if user.auth_token == params[:key]
               sub = Subscription.find_by_id(params[:subscription_id]) || Subscription.find_by_show_id(params[:show_id])
               if sub
                 if sub.user_id == user.id

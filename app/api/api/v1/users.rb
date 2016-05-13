@@ -15,10 +15,10 @@ module API
         get '/check_auth' do
           user = User.find_by(phone: params[:phone])
           if user
-            if user.key == params[:key]
+            if user.auth_token == params[:key]
               present user.subscriptions, with: API::Entities::Subscription
             else
-              error!({ ru: "Неверный ключ авторизации", en: "Wrong auth key" }, 401)
+              error!({ ru: "Неверный ключ авторизации", en: "Wrong auth auth_token" }, 401)
             end
           else
             error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
@@ -66,18 +66,12 @@ module API
           puts params
           if user
             if user.confirmation == params[:confirmation]
-              key = user.key
-              unless key
-                key = SecureRandom.hex(20)
-                user.update(key: key)
-              end
-
               subscriptions = user.subscriptions.where(active: false)
               unless subscriptions.empty?
                 subscriptions.last.update(active: true)
               end
 
-              present :key, key
+              present :auth_token, user.auth_token
               present :subscriptions, user.subscriptions, with: API::Entities::Subscription
             else
               user.subscriptions.where(active: false).delete_all
@@ -90,24 +84,48 @@ module API
 
         desc "Получение PUSH токена"
         params do
-          # requires :phone, type: String, desc: 'Телефон'
-          # requires :key, type: String, desc: 'Ключ'
+          requires :phone, type: String, desc: 'Телефон'
+          requires :key, type: String, desc: 'Ключ'
           requires :token, type: String, desc: 'PUSH токен'
         end
         get '/save_token' do
-          present Notification.push(params[:token])
-          # User.create(token: params[:token])
-          # user = User.find_by(phone: params[:phone])
-          # if user
-          #   if user.key == params[:key]
-          #     user.update(token: params[:token])
-          #     present :response, 'token saved'
-          #   else
-          #     present :error, 'wrong key'
-          #   end
-          # else
-          #   present :eror, 'user not found'
-          # end
+          user = User.find_by(phone: params[:phone])
+          if user
+            if user.auth_token == params[:key]
+              d = user.devices.where(token: params[:token]).first_or_create
+              if d
+                present :status, 'ok'
+                present :en_message, 'PUSH token saved'
+                present :message, 'Push токен сохранен'
+              else
+                error!({ ru: "Какая-то ошибка", en: "Smth go wrong" }, 500)
+              end
+            else
+              error!({ ru: "Неверный ключ авторизации", en: "Wrong auth auth_token" }, 401)
+            end
+          else
+            error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
+          end
+        end
+
+        desc "Тестирование уведомления"
+        params do
+          requires :token, type: String, desc: 'PUSH токен'
+          optionsl :message, type: String, desc: 'Текст уведомления'
+        end
+        get '/test_push' do
+          gcm = GCM.new(ENV['GCM_API_KEY'])
+          registration_ids = params[:token].split(',')
+          options = { data: { message: (params[:message] || 'тестовое уведомление') }, collapse_key: "updated_score"}
+          response = gcm.send(registration_ids, options)
+          if JSON.parse(response[:body])['results'].map{ |a| a.first.first }.include?('message_id')
+            present :status, 'ok'
+            present :en_message, 'Push notification sended'
+            present :message, 'Push уведомление отправлено'
+          else
+            errors = JSON.parse(response[:body])['results'].map{|a| a['error']}.compact
+            error!({ ru: "Ошибки: #{errors}", en: "Errord: #{errors}" }, 401)
+          end
         end
       end
     end
