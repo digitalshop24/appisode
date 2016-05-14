@@ -58,7 +58,7 @@ class Show < ActiveRecord::Base
   end
 
   def self.new_shows
-    airing.having('count(seasons.id) < ?', 3).order(popularity: :asc)
+    airing.having('MAX(seasons.number) < ?', 3).order(popularity: :asc)
   end
 
   def self.create_or_update show

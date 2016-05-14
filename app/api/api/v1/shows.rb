@@ -20,7 +20,9 @@ module API
       # expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |s|
       #   s.seasons.last.try(:number)
       # end
-      expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" }
+      expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |show|
+        show.respond_to?(:season_number) ? show.season_number : show.seasons.map(&:number).max
+      end
       # expose :next_episode, if: lambda { |object, options| object.next_episode },
       #    documentation: { type: String, desc: "Дата следующей серии" } do |show|
       #     show.next_episode.air_date
@@ -31,7 +33,7 @@ module API
     end
     class Show < ShowPreview
       expose :episodes, documentation: { type: Episode, desc: "Серии последнего сезона" }, using: API::Entities::Episode do |s|
-        s.seasons.last.episodes.order(air_date: :asc)
+        s.seasons.order(:number).last.episodes.order(air_date: :asc)
       end
     end
   end
@@ -60,9 +62,10 @@ module API
           use :pagination
         end
         get '/popular' do
-          shows = Show.popular
-          present :total, shows.count.count
-          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
+          shows = Show.popular.select('shows.*, MAX(seasons.number) AS season_number').
+            preload(:one_next_episode).paginate(page: params[:page], per_page: params[:per_page])
+          present :total, shows.total_entries
+          present :shows, shows, with: API::Entities::ShowPreview
         end
 
         desc 'Новые сериалы', entity: API::Entities::ShowPreview
@@ -70,9 +73,10 @@ module API
           use :pagination
         end
         get '/new' do
-          shows = Show.new_shows
-          present :total, shows.count.count
-          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
+          shows = Show.new_shows.select('shows.*, MAX(seasons.number) AS season_number').
+            preload(:one_next_episode).paginate(page: params[:page], per_page: params[:per_page])
+          present :total, shows.total_entries
+          present :shows, shows, with: API::Entities::ShowPreview
         end
 
         desc "Поиск сериала", entity: API::Entities::ShowPreview
@@ -81,9 +85,11 @@ module API
           requires :query, type: String, desc: 'Запрос'
         end
         get '/search' do
-          shows = Show.search(params[:query])
-          present :total, shows.count
-          present :shows, shows.paginate(page: params[:page], per_page: params[:per_page]), with: API::Entities::ShowPreview
+          shows = Show.search(params[:query]).joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id").
+            select('shows.*, MAX(seasons.number) AS season_number').group('shows.id').
+            preload(:one_next_episode).paginate(page: params[:page], per_page: params[:per_page])
+          present :total, shows.total_entries
+          present :shows, shows, with: API::Entities::ShowPreview
         end
 
         desc "Сериал по id", entity: API::Entities::Show
