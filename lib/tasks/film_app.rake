@@ -110,13 +110,13 @@ namespace :film_app do
       nt.update(performed: true) if nt.perform
     end
     # season subscriptions
-    # Subscription.season.joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today) do |sub|
-    #   nt = Notification.create(
-    #     subscription: sub,
-    #     message: I18n.t('notifications.new_episodes.today')
-    #   )
-    #   nt.update(performed: true) if nt.perform
-    # end
+    Subscription.season.joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today) do |sub|
+      nt = Notification.create(
+        subscription: sub,
+        message: I18n.t('notifications.new_episodes.today')
+      )
+      nt.update(performed: true) if nt.perform
+    end
   end
 
   task :test => :environment do

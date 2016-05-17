@@ -4,11 +4,19 @@ class Show < ActiveRecord::Base
   has_many :subscriptions
   has_many :episodes, through: :seasons
   has_many :upcoming_episodes, -> { where('episodes.air_date > ?', Time.now).order(air_date: :asc) }, through: :seasons, class_name: "Episode", source: :episodes
-  has_many :one_next_episode, -> { where('episodes.air_date > ?', Time.now).order(air_date: :asc).limit(1) }, through: :seasons, class_name: "Episode", source: :episodes
+  has_one :current_season, -> { joins(:episodes).select('seasons.*').where('episodes.air_date > ?', Time.now).order(number: :asc) }, class_name: "Season"
+  has_one :last_season, -> { order(number: :desc) }, class_name: "Season"
+  has_one :next_episode, through: :current_season
+
+  scope :airing, -> { where('shows.in_production = ? AND episodes.air_date > ?', true, Date.today).
+                      joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id LEFT OUTER JOIN episodes ON episodes.season_id = seasons.id").
+                      distinct }
+  scope :popular, -> { airing.order(popularity: :desc) }
+  scope :new_shows, -> { popular.where('number_of_seasons < ?', 3) }
 
   # default_scope { order('created_at DESC') }
   def self.search(query)
-    where('lower(name) like lower(:query) or lower(russian_name) like lower(:query)', { query: "%#{query}%" })
+    where('lower(name) LIKE lower(:query) OR lower(russian_name) LIKE lower(:query)', { query: "%#{query}%" })
   end
   def self.get_json(path, params = {})
     api_key = '15e545fda3d4598527fac7245a459571'
@@ -47,20 +55,7 @@ class Show < ActiveRecord::Base
   def self.image_url(image, format = 'w500')
     "http://image.tmdb.org/t/p/#{format}#{image}"
   end
-
-  def self.airing
-    where('shows.in_production = ? AND episodes.air_date > ?', true, Date.today).
-      joins(seasons: [:episodes]).group('shows.id')
-  end
-
-  def self.popular
-    airing.order(popularity: :asc)
-  end
-
-  def self.new_shows
-    airing.having('MAX(seasons.number) < ?', 3).order(popularity: :asc)
-  end
-
+  
   def self.create_or_update show
     new_show = Show.find_or_create_by(tmdb_id: show['id'])
     new_show.update(
@@ -79,20 +74,4 @@ class Show < ActiveRecord::Base
     )
     new_season
   end
-  # def episodes
-  #   ids = seasons.pluck(:id)
-  #   Episode.where(season_id: ids)
-  # end
-  # def upcoming_episodes
-  #   episodes.where('air_date > ?', Time.now).order(air_date: :asc)
-  # end
-  # def next_episode0
-  #   episodes.where('air_date > ?', Time.now).order(air_date: :asc).first
-  # end
-  def next_episode
-    one_next_episode.first
-  end
-  # def next_episode
-  #   Episode.joins(:season).where('seasons.show_id = ? AND episodes.air_date > ?', id, Time.now).order(air_date: :asc).limit(1).first
-  # end
 end

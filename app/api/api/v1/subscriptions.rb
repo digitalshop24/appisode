@@ -2,16 +2,9 @@ module API
   module Entities
     class Subscription < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID подписки"}
-      # expose :show_id, documentation: {type: Integer, desc: 'ID сериала'}
       expose :episode, if: lambda { |object, options| object.episode },
         documentation: { type: Episode, desc: "Серия" }, using: API::Entities::Episode
-      expose :show, documentation: { type: ShowShort, desc: "Сериал" }, using: API::Entities::ShowShort
-      # expose :name, documentation: {type: String, desc: 'Название сериала' } do |sub|
-      #   sub.show.name
-      # end
-      # expose :poster, documentation: {type: String, desc: 'URL постера' } do |sub|
-      #   sub.show.poster
-      # end
+      expose :show, documentation: { type: ShowPreview, desc: "Сериал" }, using: API::Entities::ShowPreview
       expose :subtype, documentation: {type: String, desc: 'Тип подписки' }
     end
   end
@@ -35,7 +28,9 @@ module API
           user = User.find_by(phone: params[:phone])
           if user
             if user.auth_token == params[:key]
-              present user.subscriptions.where(active: true), with: API::Entities::Subscription
+              subs = user.subscriptions.where(active: true).preload(:episode, show: [:next_episode])
+              present :total, subs.count
+              present :items, subs, with: API::Entities::Subscription
             else
               error!({ ru: "Неверный ключ авторизации", en: "Wrong auth key" }, 401)
             end

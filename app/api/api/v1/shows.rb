@@ -17,23 +17,18 @@ module API
       expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
     end
     class ShowPreview < ShowShort
-      # expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |s|
-      #   s.seasons.last.try(:number)
-      # end
-      expose :season_number, documentation: { type: Integer, desc: "Номер последнего сезона" } do |show|
-        show.respond_to?(:season_number) ? show.season_number : show.seasons.map(&:number).max
+      # expose :number_of_seasons, documentation: { type: Integer, desc: "Номер последнего сезона" }, as: :season_number
+      expose :season_number, documentation: {type: Season, desc: "Номер последнего сезона" } do |s|
+        s.last_season.number
       end
-      # expose :next_episode, if: lambda { |object, options| object.next_episode },
-      #    documentation: { type: String, desc: "Дата следующей серии" } do |show|
-      #     show.next_episode.air_date
-      # end
-      # expose :next_episode, if: lambda { |object, options| object.next_episode },
-      #   documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
+      expose :current_season_episodes_number, documentation: {type: Season, desc: "Текущий сезон" }, if: lambda{ |instance, options| instance.current_season } do |s|
+        s.current_season.episodes.order(number: :desc).limit(1).first.number
+      end
       expose :next_episode, documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
     end
     class Show < ShowPreview
       expose :episodes, documentation: { type: Episode, desc: "Серии последнего сезона" }, using: API::Entities::Episode do |s|
-        s.seasons.order(:number).last.episodes.order(air_date: :asc)
+        s.last_season.episodes.order(air_date: :asc)
       end
     end
   end
@@ -50,9 +45,7 @@ module API
           use :pagination
         end
         get do
-          shows = Show.select('shows.*, MAX(seasons.number) AS season_number').
-            joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id").group('shows.id').
-            preload(:one_next_episode).paginate(page: params[:page], per_page: params[:per_page])
+          shows = Show.preload(:next_episode).paginate(page: params[:page], per_page: params[:per_page])
           present :total, shows.total_entries
           present :shows, shows, with: API::Entities::ShowPreview
         end
@@ -62,8 +55,7 @@ module API
           use :pagination
         end
         get '/popular' do
-          shows = Show.popular.select('shows.*, MAX(seasons.number) AS season_number').
-            preload(:one_next_episode).paginate(page: params[:page], per_page: params[:per_page])
+          shows = Show.popular.preload(:next_episode).paginate(page: params[:page], per_page: params[:per_page])
           present :total, shows.total_entries
           present :shows, shows, with: API::Entities::ShowPreview
         end
@@ -73,8 +65,7 @@ module API
           use :pagination
         end
         get '/new' do
-          shows = Show.new_shows.select('shows.*, MAX(seasons.number) AS season_number').
-            preload(:one_next_episode).paginate(page: params[:page], per_page: params[:per_page])
+          shows = Show.new_shows.preload(:next_episode).paginate(page: params[:page], per_page: params[:per_page])
           present :total, shows.total_entries
           present :shows, shows, with: API::Entities::ShowPreview
         end
@@ -87,7 +78,7 @@ module API
         get '/search' do
           shows = Show.search(params[:query]).joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id").
             select('shows.*, MAX(seasons.number) AS season_number').group('shows.id').
-            preload(:one_next_episode).paginate(page: params[:page], per_page: params[:per_page])
+            preload(:next_episode).paginate(page: params[:page], per_page: params[:per_page])
           present :total, shows.total_entries
           present :shows, shows, with: API::Entities::ShowPreview
         end

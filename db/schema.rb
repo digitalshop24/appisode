@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160513110324) do
+ActiveRecord::Schema.define(version: 20160517144909) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,8 +52,9 @@ ActiveRecord::Schema.define(version: 20160513110324) do
     t.integer  "number"
     t.string   "poster"
     t.integer  "tmdb_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+    t.integer  "number_of_episodes"
   end
 
   add_index "seasons", ["show_id"], name: "index_seasons_on_show_id", using: :btree
