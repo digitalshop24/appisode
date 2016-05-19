@@ -21,7 +21,7 @@ class Show < ActiveRecord::Base
 
   def self.get_user_subs user
     joins("LEFT OUTER JOIN subscriptions ON subscriptions.show_id = shows.id AND subscriptions.user_id = #{user.id}").
-      select('shows.*, subscriptions.subtype as subscription_id')
+      select('shows.*, subscriptions.id as subscription_id')
   end
 
   def self.get_json(path, params = {})

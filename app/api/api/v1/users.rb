@@ -85,7 +85,7 @@ module API
         params do
           requires :token, type: String, desc: 'PUSH токен'
         end
-        post '/save_device_token' do
+        post '/devices' do
           error!(error_message(:auth), 401) unless authenticated
 
           d = current_user.devices.where(token: params[:token]).first_or_create
@@ -95,6 +95,25 @@ module API
             present :message, 'Push токен сохранен'
           else
             error!({ ru: "Какая-то ошибка", en: "Smth go wrong" }, 500)
+          end
+        end
+
+        desc "Удаление PUSH токена"
+        params do
+          requires :token, type: String, desc: 'PUSH токен'
+        end
+        delete '/devices' do
+          device_token = Device.find_by(token: params[:token])
+          if device_token
+            if device_token.destroy
+              present :status, 'ok'
+              present :en_message, 'PUSH token destroyed'
+              present :message, 'Push токен удален'
+            else
+              error!({ ru: "Какая-то ошибка", en: "Smth go wrong" }, 500)
+            end
+          else
+            error!({ ru: "Такой токен не найден", en: "Not found" }, 404)
           end
         end
 
