@@ -85,7 +85,7 @@ module API
         params do
           requires :token, type: String, desc: 'PUSH токен'
         end
-        post '/devices' do
+        post '/device' do
           error!(error_message(:auth), 401) unless authenticated
 
           d = current_user.devices.where(token: params[:token]).first_or_create
@@ -102,7 +102,7 @@ module API
         params do
           requires :token, type: String, desc: 'PUSH токен'
         end
-        delete '/devices' do
+        delete '/device' do
           device_token = Device.find_by(token: params[:token])
           if device_token
             if device_token.destroy
