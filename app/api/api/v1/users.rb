@@ -6,6 +6,11 @@ module API
       content_type :json, "application/json;charset=UTF-8"
       rescue_from :all
 
+      helpers do
+        include API::AuthHelper
+        include API::ErrorMessagesHelper
+      end
+
       resource :users, desc: 'Действия, связанные с регистрацией/авторизацией' do
         desc "Проверить авторизацию"
         get '/check_auth' do
