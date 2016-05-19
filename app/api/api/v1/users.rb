@@ -85,7 +85,7 @@ module API
         params do
           requires :token, type: String, desc: 'PUSH токен'
         end
-        post '/save_token' do
+        post '/save_device_token' do
           error!(error_message(:auth), 401) unless authenticated
 
           d = current_user.devices.where(token: params[:token]).first_or_create
