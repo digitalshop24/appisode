@@ -13,23 +13,21 @@ end
 module API
   module V1
     class Subscriptions < Grape::API
-      version 'v1'
-      format :json
-      content_type :json, "application/json;charset=UTF-8"
-      rescue_from :all
+      helpers SharedParams
 
       resource :subscriptions, desc: 'Подписки' do
         desc "Список всех подписок пользователя", entity: API::Entities::Subscription
         params do
           requires :phone, type: String, desc: 'Телефон'
           requires :key, type: String, desc: 'Ключ'
+          use :pagination
         end
         get do
           user = User.find_by(phone: params[:phone])
           if user
             if user.auth_token == params[:key]
-              subs = user.subscriptions.where(active: true).preload(:episode, show: [:next_episode])
-              present :total, subs.count
+              subs = user.subscriptions.where(active: true).preload(:episode, show: [:next_episode]).paginate(page: params[:page], per_page: params[:per_page])
+              present :total, subs.total_entries
               present :items, subs, with: API::Entities::Subscription
             else
               error!({ ru: "Неверный ключ авторизации", en: "Wrong auth key" }, 401)
