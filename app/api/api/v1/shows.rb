@@ -15,17 +15,19 @@ module API
       expose :name, documentation: { type: String, desc: "Название" }
       expose :russian_name, documentation: { type: String, desc: "Название на русском" }
       expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
+      expose :number_of_seasons, documentation: { type: Integer, desc: "Номер последнего сезона" }, as: :season_number
+      expose :next_episode, documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
     end
     class ShowPreview < ShowShort
-      expose :number_of_seasons, documentation: { type: Integer, desc: "Номер последнего сезона" }, as: :season_number
       # expose :season_number, documentation: {type: Season, desc: "Номер последнего сезона" } do |s|
       #   s.last_season.number
       # end
+      expose :subscription_id, documentation: {type: Season, desc: "Тип подписки" },
+        if: lambda{ |instance, options| instance.respond_to?(:subscription_id) && instance.subscription_id }
       expose :current_season_episodes_number, documentation: {type: Season, desc: "Текущий сезон" }, if: lambda{ |instance, options| instance.current_season } do |s|
         # s.current_season.episodes.order(number: :desc).limit(1).first.number
         s.current_season.number_of_episodes
       end
-      expose :next_episode, documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
     end
     class Show < ShowPreview
       expose :episodes, documentation: { type: Episode, desc: "Серии последнего сезона" }, using: API::Entities::Episode do |s|
@@ -39,6 +41,10 @@ module API
   module V1
     class Shows < Grape::API
       helpers SharedParams
+      helpers do
+        include API::AuthHelper
+        include API::ErrorMessagesHelper
+      end
 
       resource :shows, desc: 'Cериалы' do
         desc "Список всех сериалов", entity: API::Entities::ShowPreview
@@ -56,7 +62,12 @@ module API
           use :pagination
         end
         get '/popular' do
-          shows = Show.popular.preload(:next_episode, :current_season).paginate(page: params[:page], per_page: params[:per_page])
+          user = current_user if authenticated
+
+          shows = Show.popular.preload(:next_episode, :current_season)
+          shows = shows.get_user_subs(user) if user
+          shows = shows.paginate(page: params[:page], per_page: params[:per_page])
+
           present :total, shows.total_entries
           present :shows, shows, with: API::Entities::ShowPreview
         end
@@ -66,7 +77,12 @@ module API
           use :pagination
         end
         get '/new' do
-          shows = Show.new_shows.preload(:next_episode, :current_season).paginate(page: params[:page], per_page: params[:per_page])
+          user = current_user if authenticated
+
+          shows = Show.new_shows.preload(:next_episode, :current_season)
+          shows = shows.get_user_subs(user) if user
+          shows = shows.paginate(page: params[:page], per_page: params[:per_page])
+
           present :total, shows.total_entries
           present :shows, shows, with: API::Entities::ShowPreview
         end
@@ -77,9 +93,12 @@ module API
           requires :query, type: String, desc: 'Запрос'
         end
         get '/search' do
-          shows = Show.search(params[:query]).joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id").
-            select('shows.*, MAX(seasons.number) AS season_number').group('shows.id').
-            preload(:next_episode, :current_season).paginate(page: params[:page], per_page: params[:per_page])
+          user = current_user if authenticated
+
+          shows = Show.search(params[:query]).preload(:next_episode, :current_season)
+          shows = shows.get_user_subs(user) if user
+          shows = shows.paginate(page: params[:page], per_page: params[:per_page])
+
           present :total, shows.total_entries
           present :shows, shows, with: API::Entities::ShowPreview
         end
@@ -89,7 +108,12 @@ module API
           requires :id, type: Integer, desc: 'Id'
         end
         get '/:id' do
-          present Show.find(params[:id]), with: API::Entities::Show
+          user = current_user if authenticated
+
+          shows = Show.where(id: params[:id]).preload(:next_episode, :current_season).limit(1)
+          shows = shows.get_user_subs(user) if user
+
+          present shows.first, with: API::Entities::Show
         end
       end
     end

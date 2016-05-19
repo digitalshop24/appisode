@@ -18,6 +18,12 @@ class Show < ActiveRecord::Base
   def self.search(query)
     where('lower(name) LIKE lower(:query) OR lower(russian_name) LIKE lower(:query)', { query: "%#{query}%" })
   end
+
+  def self.get_user_subs user
+    joins("LEFT OUTER JOIN subscriptions ON subscriptions.show_id = shows.id AND subscriptions.user_id = #{user.id}").
+      select('shows.*, subscriptions.subtype as subscription_id')
+  end
+
   def self.get_json(path, params = {})
     api_key = '15e545fda3d4598527fac7245a459571'
     url = 'http://api.themoviedb.org/3/tv'
@@ -55,7 +61,7 @@ class Show < ActiveRecord::Base
   def self.image_url(image, format = 'w500')
     "http://image.tmdb.org/t/p/#{format}#{image}"
   end
-  
+
   def self.create_or_update show
     new_show = Show.find_or_create_by(tmdb_id: show['id'])
     new_show.update(

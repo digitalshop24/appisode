@@ -7,23 +7,23 @@ module API
       rescue_from :all
 
       resource :users, desc: 'Действия, связанные с регистрацией/авторизацией' do
-        desc "Проверить авторизацию"
-        params do
-          requires :phone, type: String, desc: 'Телефон'
-          requires :key, type: String, desc: 'Ключ'
-        end
-        get '/check_auth' do
-          user = User.find_by(phone: params[:phone])
-          if user
-            if user.auth_token == params[:key]
-              present user.subscriptions, with: API::Entities::Subscription
-            else
-              error!({ ru: "Неверный ключ авторизации", en: "Wrong auth auth_token" }, 401)
-            end
-          else
-            error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
-          end
-        end
+        # desc "Проверить авторизацию"
+        # params do
+        #   requires :phone, type: String, desc: 'Телефон'
+        #   requires :key, type: String, desc: 'Ключ'
+        # end
+        # get '/check_auth' do
+        #   user = User.find_by(phone: params[:phone])
+        #   if user
+        #     if user.auth_token == params[:key]
+        #       present user.subscriptions, with: API::Entities::Subscription
+        #     else
+        #       error!({ ru: "Неверный ключ авторизации", en: "Wrong auth auth_token" }, 401)
+        #     end
+        #   else
+        #     error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
+        #   end
+        # end
 
         desc "Регистриация"
         params do
@@ -32,7 +32,7 @@ module API
           optional :episode_id, type: Integer, desc: 'ID эпизода'
           optional :subtype, type: String, desc: 'Тип подписки (episode, new_episodes, season)'
         end
-        get '/register' do
+        post '/register' do
           confirmation = rand(1000 .. 9999)
           user = User.where(phone: params[:phone]).first_or_create
           if params[:show_id]
@@ -61,9 +61,8 @@ module API
           requires :phone, type: String, desc: 'Телефон'
           requires :confirmation, type: Integer, desc: 'Код'
         end
-        get '/check_confirmation' do
+        post '/check_confirmation' do
           user = User.find_by(phone: params[:phone])
-          puts params
           if user
             if user.confirmation == params[:confirmation]
               subscriptions = user.subscriptions.where(active: false)
@@ -82,29 +81,20 @@ module API
           end
         end
 
-        desc "Получение PUSH токена"
+        desc "Сохранение PUSH токена"
         params do
-          requires :phone, type: String, desc: 'Телефон'
-          requires :key, type: String, desc: 'Ключ'
           requires :token, type: String, desc: 'PUSH токен'
         end
-        get '/save_token' do
-          user = User.find_by(phone: params[:phone])
-          if user
-            if user.auth_token == params[:key]
-              d = user.devices.where(token: params[:token]).first_or_create
-              if d
-                present :status, 'ok'
-                present :en_message, 'PUSH token saved'
-                present :message, 'Push токен сохранен'
-              else
-                error!({ ru: "Какая-то ошибка", en: "Smth go wrong" }, 500)
-              end
-            else
-              error!({ ru: "Неверный ключ авторизации", en: "Wrong auth auth_token" }, 401)
-            end
+        post '/save_token' do
+          error!(error_message(:auth), 401) unless authenticated
+
+          d = current_user.devices.where(token: params[:token]).first_or_create
+          if d
+            present :status, 'ok'
+            present :en_message, 'PUSH token saved'
+            present :message, 'Push токен сохранен'
           else
-            error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
+            error!({ ru: "Какая-то ошибка", en: "Smth go wrong" }, 500)
           end
         end
 
