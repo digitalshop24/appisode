@@ -7,23 +7,12 @@ module API
       rescue_from :all
 
       resource :users, desc: 'Действия, связанные с регистрацией/авторизацией' do
-        # desc "Проверить авторизацию"
-        # params do
-        #   requires :phone, type: String, desc: 'Телефон'
-        #   requires :key, type: String, desc: 'Ключ'
-        # end
-        # get '/check_auth' do
-        #   user = User.find_by(phone: params[:phone])
-        #   if user
-        #     if user.auth_token == params[:key]
-        #       present user.subscriptions, with: API::Entities::Subscription
-        #     else
-        #       error!({ ru: "Неверный ключ авторизации", en: "Wrong auth auth_token" }, 401)
-        #     end
-        #   else
-        #     error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
-        #   end
-        # end
+        desc "Проверить авторизацию"
+        get '/check_auth' do
+          error!(error_message(:auth), 401) unless authenticated
+
+          present :status, 'ok'
+        end
 
         desc "Регистриация"
         params do
