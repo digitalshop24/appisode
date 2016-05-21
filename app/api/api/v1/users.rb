@@ -134,7 +134,7 @@ module API
             present :status, 'ok'
             present :en_message, 'Push notification sended'
             present :message, 'Push уведомление отправлено'
-            present :sended_data, options
+            present :sended_data, options.to_s
           else
             errors = JSON.parse(response[:body])['results'].map{|a| a['error']}.compact
             error!({ ru: "Ошибки: #{errors}", en: "Errors: #{errors}" }, 401)
