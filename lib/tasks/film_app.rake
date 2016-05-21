@@ -16,7 +16,7 @@ namespace :film_app do
     end
   end
 
-  task :load_all, [:from, :to] => :environment do
+  task :load_all, [:from, :to] => :environment do |t, args|
     from, to = (args[:from] ? args[:from].to_i : 1), (args[:to] ? args[:to].to_i : 66000)
     (from..to).each do |i|
       begin
