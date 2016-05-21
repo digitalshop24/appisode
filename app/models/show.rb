@@ -11,7 +11,7 @@ class Show < ActiveRecord::Base
   scope :airing, -> { where('shows.in_production = ? AND episodes.air_date > ?', true, Date.today).
                       joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id LEFT OUTER JOIN episodes ON episodes.season_id = seasons.id").
                       distinct }
-  scope :popular, -> { airing.order(popularity: :desc) }
+  scope :popular, -> { airing.order(popularity: :asc) }
   scope :new_shows, -> { popular.where('number_of_seasons < ?', 3) }
 
   # default_scope { order('created_at DESC') }
