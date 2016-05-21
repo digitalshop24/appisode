@@ -27,7 +27,9 @@ module API
         get do
           error!(error_message(:auth), 401) unless authenticated
 
-          subs = current_user.subscriptions.where(active: true).preload(:episode, show: [:next_episode]).paginate(page: params[:page], per_page: params[:per_page])
+          subs = current_user.subscriptions.where(active: true).
+            preload(:episode, show: [:next_episode, :current_season]).
+            paginate(page: params[:page], per_page: params[:per_page])
           present :total, subs.total_entries
           present :items, subs, with: API::Entities::Subscription
         end

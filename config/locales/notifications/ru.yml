@@ -1,8 +1,8 @@
 ru:
   notifications:
     episode:
-      today: "Сегодня выходит %{number} серия сериала \"%{show}\""
+      today: "\"%{show}\" - %{season} сезон %{number} серия"
     new_episodes:
-      today: "Сегодня выходит новая серия сериала \"%{show}\""
+      today: "\"%{show}\" - %{season} сезон %{number} серия"
     season:
-      today: "Сегодня выходит последняя серия в сезоне сериала \"%{show}\""
+      today: "\"%{show}\" - полностью вышел %{season} сезон"

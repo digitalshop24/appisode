@@ -94,14 +94,15 @@ namespace :film_app do
 
   task inform: :enviroment do
     # episode subscriptions
-    subscriptions = Subscription.episode.select('subscriptions.*, episodes.number AS episode_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
+    subscriptions = Subscription.episode.
+      select('subscriptions.*, episodes.number AS episode_number, seasons.number AS season_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
       joins(episode: [season: [:show]]).where('episodes.air_date' => Date.today)
     subscriptions_count = subscriptions.count('subscriptions.id')
     successful = 0
     subscriptions.each_with_index do |sub, i|
       nt = Notification.create(
         subscription: sub,
-        message: I18n.t('notifications.episode.today', number: sub.episode_number, show: sub.show_ru_name)
+        message: I18n.t('notifications.episode.today', season: sub.season_number, episode: sub.episode_number, show: sub.show_ru_name)
       )
       if nt.perform
         nt.update(performed: true)
@@ -115,13 +116,15 @@ namespace :film_app do
     puts "RESULT INFORM_LOG EPISODE #{successful}/#{subscriptions_count} successful"
 
     # all new episodes subscriptions
-    subscriptions = Subscription.new_episodes.select('subscriptions.*, shows.name AS show_name, shows.russian_name AS show_ru_name').joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today)
+    subscriptions = Subscription.new_episodes.
+      select('subscriptions.*, episodes.number AS episode_number, seasons.number AS season_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
+      joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today)
     subscriptions_count = subscriptions.count('subscriptions.id')
     successful = 0
     subscriptions.each_with_index do |sub, i|
       nt = Notification.create(
         subscription: sub,
-        message: I18n.t('notifications.new_episodes.today', show: sub.show_ru_name)
+        message: I18n.t('notifications.new_episodes.today', season: sub.episode.season.number, episode: sub.episode_number, show: sub.show_ru_name)
       )
       if nt.perform
         nt.update(performed: true)
@@ -135,7 +138,9 @@ namespace :film_app do
     puts "RESULT INFORM_LOG NEW_EPISODES #{successful}/#{subscriptions_count} successful"
 
     # season subscriptions
-    subscriptions = Subscription.season.select('subscriptions.*, seasons.number_of_episodes as number_of_episodes, episodes.number as current_episode_number').joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today)
+    subscriptions = Subscription.season.
+      select('subscriptions.*, episodes.number AS episode_number, seasons.number AS season_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
+      joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today)
     subscriptions_count = subscriptions.count('subscriptions.id')
     i = 0
     successful = 0
@@ -144,7 +149,7 @@ namespace :film_app do
         i += 1
         nt = Notification.create(
           subscription: sub,
-          message: I18n.t('notifications.new_episodes.today')
+          message: I18n.t('notifications.season.today', season: sub.episode.season.number, episode: sub.episode_number, show: sub.show_ru_name)
         )
         if nt.perform
           nt.update(performed: true)
