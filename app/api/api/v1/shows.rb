@@ -22,9 +22,9 @@ module API
       # expose :season_number, documentation: {type: Season, desc: "Номер последнего сезона" } do |s|
       #   s.last_season.number
       # end
-      expose :subscription_id, documentation: {type: Season, desc: "Тип подписки" },
+      expose :subscription_id, documentation: {type: Integer, desc: "Id подписки" },
         if: lambda{ |instance, options| instance.respond_to?(:subscription_id) && instance.subscription_id }
-      expose :current_season_episodes_number, documentation: {type: Season, desc: "Текущий сезон" }, if: lambda{ |instance, options| instance.current_season } do |s|
+      expose :current_season_episodes_number, documentation: {type: Integer, desc: "Количество серий в текущем сезоне" }, if: lambda{ |instance, options| instance.current_season } do |s|
         # s.current_season.episodes.order(number: :desc).limit(1).first.number
         s.current_season.number_of_episodes
       end
