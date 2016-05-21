@@ -92,7 +92,7 @@ namespace :film_app do
     end
   end
 
-  task inform: :enviroment do
+  task inform: :environment do
     # episode subscriptions
     subscriptions = Subscription.episode.
       select('subscriptions.*, episodes.number AS episode_number, seasons.number AS season_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
