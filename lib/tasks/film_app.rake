@@ -145,7 +145,7 @@ namespace :film_app do
     i = 0
     successful = 0
     subscriptions.each do |sub|
-      if sub.current_episode_number == sub.number_of_episodes
+      if sub.episode_number == sub.number_of_episodes
         i += 1
         nt = Notification.create(
           subscription: sub,
