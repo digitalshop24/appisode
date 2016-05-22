@@ -149,7 +149,7 @@ namespace :film_app do
         i += 1
         nt = Notification.create(
           subscription: sub,
-          message: I18n.t('notifications.season.today', season: sub.season_number, episode: sub.episode_number, show: sub.show_ru_name)
+          message: I18n.t('notifications.season.today', season: sub.season_number, episode: sub.current_episode_number, show: sub.show_ru_name)
         )
         if nt.perform
           nt.update(performed: true)
