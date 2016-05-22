@@ -139,13 +139,13 @@ namespace :film_app do
 
     # season subscriptions
     subscriptions = Subscription.season.
-      select('subscriptions.*, episodes.number AS episode_number, seasons.number AS season_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
+      select('subscriptions.*, seasons.number_of_episodes as number_of_episodes, episodes.number AS current_episode_number, seasons.number AS season_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
       joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today)
     subscriptions_count = subscriptions.count('subscriptions.id')
     i = 0
     successful = 0
     subscriptions.each do |sub|
-      if sub.episode_number == sub.number_of_episodes
+      if sub.current_episode_number == sub.number_of_episodes
         i += 1
         nt = Notification.create(
           subscription: sub,
