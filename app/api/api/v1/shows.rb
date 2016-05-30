@@ -95,11 +95,9 @@ module API
         get '/search' do
           user = current_user if authenticated
 
-          shows = Show.search(params[:query]).preload(:next_episode, :current_season)
-          shows = shows.get_user_subs(user) if user
-          shows = shows.paginate(page: params[:page], per_page: params[:per_page])
+          shows = Show.search params[:query], order: {popularity: :desc}, page: params[:page], per_page: params[:per_page]
 
-          present :total, shows.total_entries
+          present :total, shows.total_count
           present :shows, shows, with: API::Entities::ShowPreview
         end
 
