@@ -6,24 +6,18 @@ module API
       content_type :json, "application/json;charset=UTF-8"
       rescue_from :all
 
+      helpers do
+        include API::AuthHelper
+        include API::ErrorMessagesHelper
+      end
+
       resource :users, desc: 'Действия, связанные с регистрацией/авторизацией' do
-        # desc "Проверить авторизацию"
-        # params do
-        #   requires :phone, type: String, desc: 'Телефон'
-        #   requires :key, type: String, desc: 'Ключ'
-        # end
-        # get '/check_auth' do
-        #   user = User.find_by(phone: params[:phone])
-        #   if user
-        #     if user.auth_token == params[:key]
-        #       present user.subscriptions, with: API::Entities::Subscription
-        #     else
-        #       error!({ ru: "Неверный ключ авторизации", en: "Wrong auth auth_token" }, 401)
-        #     end
-        #   else
-        #     error!({ ru: "Пользователь не найден", en: "User not found" }, 404)
-        #   end
-        # end
+        desc "Проверить авторизацию"
+        get '/check_auth' do
+          error!(error_message(:auth), 401) unless authenticated
+
+          present :status, 'ok'
+        end
 
         desc "Регистриация"
         params do
@@ -121,19 +115,29 @@ module API
         params do
           requires :token, type: String, desc: 'PUSH токен'
           optional :message, type: String, desc: 'Текст уведомления'
+          optional :push_type, type: String, desc: 'Тип: data или notification (по умолчанию - data)', values: %w(data notification)
+          optional :icon, type: String, desc: 'Иконка (по умолчанию: http://icons.iconarchive.com/icons/graphicloads/colorful-long-shadow/256/Home-icon.png)'
+          optional :collapse_key, type: String, desc: 'Хз что это (по умолчанию updated_score), только у data'
         end
         get '/test_push' do
           gcm = GCM.new(ENV['GCM_API_KEY'])
           registration_ids = params[:token].split(',')
-          options = { data: { message: (params[:message] || 'тестовое уведомление') }, collapse_key: "updated_score"}
+          icon = params[:icon] || 'http://icons.iconarchive.com/icons/graphicloads/colorful-long-shadow/256/Home-icon.png'
+          message = params[:message] || 'тестовое уведомление'
+          options = if params[:push_type] == 'notification'
+            { notification: { body: message, title: 'Appisode', icon: icon } }
+          else
+            { data: { message: message, path: icon }, collapse_key: "updated_score"}
+          end
           response = gcm.send(registration_ids, options)
           if JSON.parse(response[:body])['results'].map{ |a| a.first.first }.include?('message_id')
             present :status, 'ok'
             present :en_message, 'Push notification sended'
             present :message, 'Push уведомление отправлено'
+            present :sended_data, options.to_s
           else
             errors = JSON.parse(response[:body])['results'].map{|a| a['error']}.compact
-            error!({ ru: "Ошибки: #{errors}", en: "Errord: #{errors}" }, 401)
+            error!({ ru: "Ошибки: #{errors}", en: "Errors: #{errors}" }, 401)
           end
         end
       end
