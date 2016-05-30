@@ -1,5 +1,5 @@
 class Show < ActiveRecord::Base
-  searchkick
+  searchkick word_start: [:name, :russian_name]
   has_many :seasons
   has_many :subscriptions
   has_many :episodes, through: :seasons
@@ -18,7 +18,7 @@ class Show < ActiveRecord::Base
     joins("LEFT OUTER JOIN subscriptions ON subscriptions.show_id = shows.id AND subscriptions.user_id = #{user.id}").
       select('shows.*, subscriptions.id as subscription_id')
   end
-  
+
   def self.get_json(path, params = {})
     api_key = '15e545fda3d4598527fac7245a459571'
     url = 'http://api.themoviedb.org/3/tv'

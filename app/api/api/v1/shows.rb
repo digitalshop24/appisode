@@ -95,7 +95,7 @@ module API
         get '/search' do
           user = current_user if authenticated
 
-          shows = Show.search params[:query], order: {popularity: :desc}, page: params[:page], per_page: params[:per_page]
+          shows = Show.search params[:query], page: params[:page], per_page: params[:per_page], match: :word_start, fields: [:name, :russian_name]
 
           present :total, shows.total_count
           present :shows, shows, with: API::Entities::ShowPreview
