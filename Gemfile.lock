@@ -81,6 +81,14 @@ GEM
       responders
       thread_safe (~> 0.1)
       warden (~> 1.2.3)
+    elasticsearch (1.0.17)
+      elasticsearch-api (= 1.0.17)
+      elasticsearch-transport (= 1.0.17)
+    elasticsearch-api (1.0.17)
+      multi_json
+    elasticsearch-transport (1.0.17)
+      faraday
+      multi_json
     equalizer (0.0.11)
     erubis (2.7.0)
     excon (0.45.4)
@@ -244,6 +252,10 @@ GEM
     sdoc (0.4.1)
       json (~> 1.7, >= 1.7.7)
       rdoc (~> 4.0)
+    searchkick (1.3.0)
+      activemodel
+      elasticsearch (>= 1)
+      hashie
     sendgrid (1.2.4)
       json
     slop (3.6.0)
@@ -321,6 +333,7 @@ DEPENDENCIES
   rake (= 10.4.2)
   sass-rails (~> 4.0.0)
   sdoc
+  searchkick (~> 1.3)
   sendgrid
   themoviedb
   turbolinks

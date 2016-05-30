@@ -26,6 +26,7 @@ gem 'whenever', :require => false
 gem 'rack-cors', :require => 'rack/cors'
 gem 'faker', '~> 1.6', '>= 1.6.3'
 gem 'gcm', '~> 0.1.1'
+gem 'searchkick', '~> 1.3'
 
 group :doc do
   gem 'sdoc', require: false

@@ -1,5 +1,5 @@
-require 'open-uri'
 class Show < ActiveRecord::Base
+  searchkick
   has_many :seasons
   has_many :subscriptions
   has_many :episodes, through: :seasons
@@ -13,11 +13,6 @@ class Show < ActiveRecord::Base
                       distinct }
   scope :popular, -> { airing.order(popularity: :desc) }
   scope :new_shows, -> { popular.where('number_of_seasons < ?', 3) }
-
-  # default_scope { order('created_at DESC') }
-  def self.search(query)
-    where('lower(name) LIKE lower(:query) OR lower(russian_name) LIKE lower(:query)', { query: "%#{query}%" })
-  end
 
   def self.get_user_subs user
     joins("LEFT OUTER JOIN subscriptions ON subscriptions.show_id = shows.id AND subscriptions.user_id = #{user.id}").
