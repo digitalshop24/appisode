@@ -22,6 +22,13 @@ module API
         s.current_season.number_of_episodes
       end
     end
+    class ShowSearch < ShowShort
+      expose :subscription_id, documentation: {type: Integer, desc: "Id подписки" },
+        if: lambda{ |instance, options| options[:user] } do |instance, options|
+          sub = options[:user].subscriptions.find_by(show_id: instance.id)
+          sub.id if sub
+      end
+    end
     class ShowPreview < ShowShort
       # expose :season_number, documentation: {type: Season, desc: "Номер последнего сезона" } do |s|
       #   s.last_season.number
@@ -95,10 +102,10 @@ module API
         get '/search' do
           user = current_user if authenticated
 
-          shows = Show.search params[:query], page: params[:page], per_page: params[:per_page], match: :word_start, fields: [:name, :russian_name]
+          shows = Show.search params[:query], order: { popularity: :asc }, page: params[:page], per_page: params[:per_page], match: :word_start, fields: [:name, :russian_name]
 
           present :total, shows.total_count
-          present :shows, shows, with: API::Entities::ShowPreview
+          present :shows, shows, with: API::Entities::ShowSearch, user: user
         end
 
         desc "Сериал по id", entity: API::Entities::Show
