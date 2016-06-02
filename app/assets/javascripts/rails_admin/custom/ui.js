@@ -94,7 +94,25 @@ var ready;
 ready = function() {
 	$("#show_tags_field").tagit({
 		allowSpaces: true,
-		singleField: true
+		singleField: true,
+    autocomplete: {
+      delay: 0, 
+      minLength: 2,
+      source: function( request, response ) {
+        var that = this;
+        $.ajax({
+          url: "/show/tags", 
+          data: { q: request.term },
+          dataType: "json",
+          success: function( choices ) {
+            if (!that.options.allowDuplicates) {
+              choices = that._subtractArray(choices, that.assignedTags());
+            }
+            response( choices );
+          }
+        });
+      }
+    }
 	});
 };
 

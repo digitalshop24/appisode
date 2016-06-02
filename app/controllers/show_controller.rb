@@ -6,4 +6,9 @@ class ShowController < ApplicationController
 			@shows= Show.all
 		end
 	end
+
+	def tags
+		@tags = Show.where('tag like ?', "#{params[:q]}%").all_tags
+		render json: @tags
+	end
 end
