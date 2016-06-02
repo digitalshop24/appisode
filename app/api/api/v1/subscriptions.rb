@@ -29,8 +29,8 @@ module API
 
           subs = current_user.subscriptions.where(active: true).
             preload(:episode, show: [:next_episode, :current_season]).
-            paginate(page: params[:page], per_page: params[:per_page])
-          present :total, subs.total_entries
+            page(params[:page]).per(params[:per_page])
+          present :total, subs.total_count
           present :items, subs, with: API::Entities::Subscription
         end
 

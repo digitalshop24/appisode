@@ -59,8 +59,8 @@ module API
           use :pagination
         end
         get do
-          shows = Show.preload(:next_episode, :current_season).paginate(page: params[:page], per_page: params[:per_page])
-          present :total, shows.total_entries
+          shows = Show.preload(:next_episode, :current_season).page(params[:page]).per(params[:per_page])
+          present :total, shows.total_count
           present :shows, shows, with: API::Entities::ShowPreview
         end
 
@@ -73,9 +73,9 @@ module API
 
           shows = Show.popular.preload(:next_episode, :current_season)
           shows = shows.get_user_subs(user) if user
-          shows = shows.paginate(page: params[:page], per_page: params[:per_page])
+          shows = shows.page(params[:page]).per(params[:per_page])
 
-          present :total, shows.total_entries
+          present :total, shows.total_count
           present :shows, shows, with: API::Entities::ShowPreview
         end
 
@@ -88,9 +88,9 @@ module API
 
           shows = Show.new_shows.preload(:next_episode, :current_season)
           shows = shows.get_user_subs(user) if user
-          shows = shows.paginate(page: params[:page], per_page: params[:per_page])
+          shows = shows.page(params[:page]).per(params[:per_page])
 
-          present :total, shows.total_entries
+          present :total, shows.total_count
           present :shows, shows, with: API::Entities::ShowPreview
         end
 

@@ -1,5 +1,6 @@
 class Show < ActiveRecord::Base
   searchkick word_start: [:name, :russian_name]
+  acts_as_taggable_array_on :tags
   has_many :seasons
   has_many :subscriptions
   has_many :episodes, through: :seasons
@@ -17,6 +18,15 @@ class Show < ActiveRecord::Base
   def self.get_user_subs user
     joins("LEFT OUTER JOIN subscriptions ON subscriptions.show_id = shows.id AND subscriptions.user_id = #{user.id}").
       select('shows.*, subscriptions.id as subscription_id')
+  end
+
+  def tags_field= string
+    puts '1'*100, string
+    self.tags = string.split(',')
+  end
+
+  def tags_field
+    tags.join(',')
   end
 
   def self.get_json(path, params = {})
@@ -74,5 +84,38 @@ class Show < ActiveRecord::Base
       poster: Show.image_url(season['poster_path'])
     )
     new_season
+  end
+
+  rails_admin do
+    list do
+      sort_by :popularity
+      field :id do
+        column_width 60
+      end
+      field :tmdb_id do
+        column_width 60
+      end
+      field :poster do
+        column_width 110
+        formatted_value do
+          bindings[:view].tag(:img, src: bindings[:object].poster, width: '100')
+        end
+      end
+      field :name
+      field :russian_name
+      field :number_of_seasons do
+        column_width 60
+      end
+      field :popularity do
+        column_width 60
+      end
+      field :in_production do
+        column_width 60
+      end
+    end
+    edit do
+      fields :name, :russian_name, :tmdb_id, :poster, :popularity, :in_production
+      field :tags_field
+    end
   end
 end

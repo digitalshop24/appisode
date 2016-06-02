@@ -1,0 +1,68 @@
+/* iCheck plugin Flat skin, orange
+----------------------------------- */
+/* line 5, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+.icheckbox_flat-orange,
+.iradio_flat-orange {
+  display: inline-block;
+  *display: inline;
+  vertical-align: middle;
+  margin: 0;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  background: url(/assets/icheck/flat/orange-346283f47d643504db1704441531e4da.png) no-repeat;
+  border: none;
+  cursor: pointer;
+}
+
+/* line 18, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+.icheckbox_flat-orange {
+  background-position: 0 0;
+}
+
+/* line 21, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+.icheckbox_flat-orange.checked {
+  background-position: -22px 0;
+}
+
+/* line 24, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+.icheckbox_flat-orange.disabled {
+  background-position: -44px 0;
+  cursor: default;
+}
+
+/* line 28, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+.icheckbox_flat-orange.checked.disabled {
+  background-position: -66px 0;
+}
+
+/* line 32, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+.iradio_flat-orange {
+  background-position: -88px 0;
+}
+
+/* line 35, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+.iradio_flat-orange.checked {
+  background-position: -110px 0;
+}
+
+/* line 38, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+.iradio_flat-orange.disabled {
+  background-position: -132px 0;
+  cursor: default;
+}
+
+/* line 42, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+.iradio_flat-orange.checked.disabled {
+  background-position: -154px 0;
+}
+
+/* HiDPI support */
+@media (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
+  /* line 49, /home/dshop/.rvm/gems/ruby-2.3.0/gems/icheck-rails-1.0.2.2/vendor/assets/stylesheets/icheck/flat/orange.scss */
+  .icheckbox_flat-orange,
+  .iradio_flat-orange {
+    background-image: url(/assets/icheck/flat/orange@2x-391e46cf4fabbe9be6098746ffb7df29.png);
+    background-size: 176px 22px;
+  }
+}
