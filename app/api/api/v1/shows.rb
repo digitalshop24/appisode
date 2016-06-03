@@ -24,9 +24,9 @@ module API
     end
     class ShowSearch < ShowShort
       expose :subscription_id, documentation: {type: Integer, desc: "Id подписки" },
-        if: lambda{ |instance, options| options[:user] } do |instance, options|
-          sub = options[:user].subscriptions.find_by(show_id: instance.id)
-          sub.id if sub
+      if: lambda{ |instance, options| options[:user] } do |instance, options|
+        sub = options[:user].subscriptions.find_by(show_id: instance.id)
+        sub.id if sub
       end
     end
     class ShowPreview < ShowShort
@@ -119,6 +119,26 @@ module API
           shows = shows.get_user_subs(user) if user
 
           present shows.first, with: API::Entities::Show
+        end
+
+        desc 'Страница сериала', entity: API::Entities::ShowPreview
+        params do
+          use :pagination
+          requires :id, type: Integer, desc: 'Id'
+        end
+        get '/:id/page' do
+          user = current_user if authenticated
+          
+          shows = Show.popular.preload(:next_episode, :current_season)
+          shows = shows.get_user_subs(user) if user
+          shows = shows.page(params[:page]).per(params[:per_page])
+
+          if(!params[:page] || params[:page] == 1)
+            show = Show.where(id: params[:id]).preload(:next_episode, :current_season).limit(1)
+            show = shows.get_user_subs(user) if user
+          end
+          res = show ? show + shows : shows
+          present res, with: API::Entities::ShowPreview
         end
       end
     end
