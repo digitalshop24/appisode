@@ -135,10 +135,11 @@ module API
 
           if(!params[:page] || params[:page] == 1)
             show = Show.where(id: params[:id]).preload(:next_episode, :current_season).limit(1)
-            show = shows.get_user_subs(user) if user
+            show = show.get_user_subs(user) if user
           end
           res = show ? show + shows : shows
-          present res, with: API::Entities::ShowPreview
+          present :total, shows.total_count
+          present :shows, res, with: API::Entities::ShowPreview
         end
       end
     end
