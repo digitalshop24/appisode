@@ -35,6 +35,8 @@ gem 'wysiwyg-rails'
 gem 'icheck-rails'
 gem 'rails_admin_rollincode', git: 'https://github.com/rollincode/rails_admin_theme'
 
+gem 'twilio-ruby', '~> 4.11', '>= 4.11.1'
+
 group :doc do
   gem 'sdoc', require: false
 end

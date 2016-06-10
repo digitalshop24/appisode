@@ -28,7 +28,10 @@ module API
         end
         post '/register' do
           confirmation = rand(1000 .. 9999)
-          user = User.where(phone: params[:phone]).first_or_create
+          phone = ::Phone.new(params[:phone])
+          error!({ ru: 'Неверный номер', en: 'Invalid phone' }, 406) unless phone.valid?
+          
+          user = User.where(phone: phone.formatted_phone).first_or_create
           if params[:show_id]
             user.subscriptions.create(
               show_id: params[:show_id],
@@ -39,9 +42,10 @@ module API
           end
           user.update(confirmation: confirmation)
 
-          sms = SmsAssistent.new.send(params[:phone], confirmation)
+          sms = SmsTwilio.new.send(phone.formatted_phone, confirmation)
           info = sms.info
           if sms.status == 'ok'
+            present :phone, user.phone
             present :status, 'ok'
             present :en_message, info[:en]
             present :message, info[:ru]
