@@ -38,7 +38,7 @@ module API
     end
     class Show < ShowPreview
       expose :episodes, documentation: { type: Episode, desc: "Серии последнего сезона" }, using: API::Entities::Episode do |s|
-        s.last_season.episodes.order(air_date: :asc)
+        s.last_season.episodes
       end
     end
   end

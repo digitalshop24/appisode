@@ -1,6 +1,6 @@
 class Season < ActiveRecord::Base
   belongs_to :show
-  has_many :episodes
+  has_many :episodes, -> { order number: :asc }
   has_one :next_episode, -> { where('episodes.air_date > ?', Date.today).order(air_date: :asc) }, class_name: "Episode"
   after_save :check_show_season_number
 
