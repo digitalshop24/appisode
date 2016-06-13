@@ -12,9 +12,11 @@ module API
     class ShowShort < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID"}
       expose :poster, documentation: { type: String, desc: "Постер" }
-      expose :name, documentation: { type: String, desc: "Название" }
-      expose :russian_name, documentation: { type: String, desc: "Название на русском" }
-      expose :in_production, documentation: { type: "Boolean", desc: "Выходит ли еще" }
+      expose :name, documentation: { type: String, desc: "Название" } do |show, options|
+        show.name(options[:language])
+      end
+      expose :name_original, documentation: { type: String, desc: "Оригинальное название" }
+      expose :status, documentation: { type: String, desc: "Статус сериала" }
       expose :number_of_seasons, documentation: { type: Integer, desc: "Номер последнего сезона" }, as: :season_number
       expose :next_episode, documentation: { type: Episode, desc: "Следующая серия" }, using: API::Entities::Episode
       expose :current_season_episodes_number, documentation: {type: Integer, desc: "Количество серий в текущем сезоне" }, if: lambda{ |instance, options| instance.current_season } do |s|
@@ -61,7 +63,7 @@ module API
         get do
           shows = Show.preload(:next_episode, :current_season).page(params[:page]).per(params[:per_page])
           present :total, shows.total_count
-          present :shows, shows, with: API::Entities::ShowPreview
+          present :shows, shows, with: API::Entities::ShowPreview, language: language
         end
 
         desc 'Популярные сериалы', entity: API::Entities::ShowPreview
@@ -76,7 +78,7 @@ module API
           shows = shows.page(params[:page]).per(params[:per_page])
 
           present :total, shows.total_count
-          present :shows, shows, with: API::Entities::ShowPreview
+          present :shows, shows, with: API::Entities::ShowPreview, language: language
         end
 
         desc 'Новые сериалы', entity: API::Entities::ShowPreview
@@ -91,7 +93,7 @@ module API
           shows = shows.page(params[:page]).per(params[:per_page])
 
           present :total, shows.total_count
-          present :shows, shows, with: API::Entities::ShowPreview
+          present :shows, shows, with: API::Entities::ShowPreview, language: language
         end
 
         desc "Поиск сериала", entity: API::Entities::ShowPreview
@@ -102,10 +104,10 @@ module API
         get '/search' do
           user = current_user if authenticated
 
-          shows = Show.search params[:query], order: { popularity: :asc }, page: params[:page], per_page: params[:per_page], match: :word_start, fields: [:name, :russian_name]
+          shows = Show.search params[:query], order: { popularity: :asc }, page: params[:page], per_page: params[:per_page], match: :word_start, fields: Show.name_fields(:ru)
 
           present :total, shows.total_count
-          present :shows, shows, with: API::Entities::ShowSearch, user: user
+          present :shows, shows, with: API::Entities::ShowSearch, user: user, language: language
         end
 
         desc "Сериал по id", entity: API::Entities::Show
@@ -118,7 +120,7 @@ module API
           shows = Show.where(id: params[:id]).preload(:next_episode, :current_season).limit(1)
           shows = shows.get_user_subs(user) if user
 
-          present shows.first, with: API::Entities::Show
+          present shows.first, with: API::Entities::Show, language: language
         end
 
         desc 'Страница сериала', entity: API::Entities::ShowPreview
@@ -139,7 +141,7 @@ module API
           end
           res = show ? show + shows : shows
           present :total, shows.total_count
-          present :shows, res, with: API::Entities::ShowPreview
+          present :shows, res, with: API::Entities::ShowPreview, language: language
         end
       end
     end

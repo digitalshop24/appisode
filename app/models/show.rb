@@ -1,5 +1,5 @@
 class Show < ActiveRecord::Base
-  searchkick word_start: [:name, :russian_name]
+  searchkick word_start: [:name_original, :name_ru, :name_en]
   acts_as_taggable_array_on :tags
   has_many :seasons
   has_many :subscriptions
@@ -14,14 +14,24 @@ class Show < ActiveRecord::Base
                       distinct }
   scope :popular, -> { airing.order(popularity: :asc) }
   scope :new_shows, -> { popular.where('number_of_seasons < ?', 3) }
+  enum status: { airing: 'airing', hiatus: 'hiatus', closed: 'closed' }
 
   def self.get_user_subs user
     joins("LEFT OUTER JOIN subscriptions ON subscriptions.show_id = shows.id AND subscriptions.user_id = #{user.id}").
       select('shows.*, subscriptions.id as subscription_id')
   end
 
+  def name lang = :original
+    self["name_#{lang}".to_sym] || self[:name_original]
+    # self["name_#{lang}".to_sym] || self[:name_ru] || self[:name_original]
+  end
+
+  def self.name_fields lang = nil
+    res = lang && column_names.include?("name_#{lang}") ? ["name_#{lang}".to_sym] : []
+    res + [:name_original, :name_en]
+  end
+
   def tags_field= string
-    puts '1'*100, string
     self.tags = string.split(',')
   end
 
@@ -70,8 +80,8 @@ class Show < ActiveRecord::Base
   def self.create_or_update show
     new_show = Show.find_or_create_by(tmdb_id: show['id'])
     new_show.update(
-      russian_name: show['name'],
-      name: show['original_name'],
+      name_ru: show['name'],
+      name_original: show['original_name'],
       poster: Show.image_url(show['poster_path']),
       in_production: show['in_production']
     )
@@ -101,8 +111,9 @@ class Show < ActiveRecord::Base
           bindings[:view].tag(:img, src: bindings[:object].poster, width: '100')
         end
       end
-      field :name
-      field :russian_name
+      field :name_original
+      field :name_en
+      field :name_ru
       field :number_of_seasons do
         column_width 60
       end
@@ -114,7 +125,7 @@ class Show < ActiveRecord::Base
       end
     end
     edit do
-      fields :name, :russian_name, :tmdb_id, :poster, :popularity, :in_production
+      fields :name_original, :name_ru, :name_en, :tmdb_id, :poster, :popularity, :in_production
       field :tags_field
     end
   end

@@ -2,6 +2,8 @@
 # require 'net/http'
 
 class Notification < ActiveRecord::Base
+  scope :not_viewed, -> { where(viewed: false).order(created_at: :desc) }
+  has_one :show, through: :subscription
   belongs_to :subscription
 
   def perform
@@ -12,4 +14,6 @@ class Notification < ActiveRecord::Base
     response = gcm.send(registration_ids, options)
     JSON.parse(response[:body])['results'].map{ |a| a.first.first }.include?('message_id')
   end
+
+
 end

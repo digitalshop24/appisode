@@ -93,75 +93,80 @@ namespace :film_app do
   end
 
   task inform: :environment do
-    # episode subscriptions
-    subscriptions = Subscription.episode.
-      select('subscriptions.*, episodes.number AS episode_number, seasons.number AS season_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
-      joins(episode: [season: [:show]]).where('episodes.air_date' => Date.today)
-    subscriptions_count = subscriptions.count('subscriptions.id')
-    successful = 0
-    subscriptions.each_with_index do |sub, i|
-      nt = Notification.create(
-        subscription: sub,
-        message: I18n.t('notifications.episode.today', season: sub.season_number, episode: sub.episode_number, show: sub.show_ru_name)
-      )
-      if nt.perform
-        nt.update(performed: true)
-        success = true
-        puts "success == INFORM_LOG EPISODE #{i+1}/#{subscriptions_count} (id=#{sub.id})"
-        successful += 1
-      else
-        puts "error == INFORM_LOG EPISODE #{i+1}/#{subscriptions_count} (id=#{sub.id})"
-      end
-    end
-    puts "RESULT INFORM_LOG EPISODE #{successful}/#{subscriptions_count} successful"
-
-    # all new episodes subscriptions
-    subscriptions = Subscription.new_episodes.
-      select('subscriptions.*, episodes.number AS episode_number, seasons.number AS season_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
-      joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today)
-    subscriptions_count = subscriptions.count('subscriptions.id')
-    successful = 0
-    subscriptions.each_with_index do |sub, i|
-      nt = Notification.create(
-        subscription: sub,
-        message: I18n.t('notifications.new_episodes.today', season: sub.season_number, episode: sub.episode_number, show: sub.show_ru_name)
-      )
-      if nt.perform
-        nt.update(performed: true)
-        success = true
-        puts "success == INFORM_LOG NEW_EPISODES #{i+1}/#{subscriptions_count} (id=#{sub.id})"
-        successful += 1
-      else
-        puts "error == INFORM_LOG NEW_EPISODES #{i+1}/#{subscriptions_count} (id=#{sub.id})"
-      end
-    end
-    puts "RESULT INFORM_LOG NEW_EPISODES #{successful}/#{subscriptions_count} successful"
-
-    # season subscriptions
-    subscriptions = Subscription.season.
-      select('subscriptions.*, seasons.number_of_episodes as number_of_episodes, episodes.number AS current_episode_number, seasons.number AS season_number, shows.name AS show_name, shows.russian_name AS show_ru_name').
-      joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today)
-    subscriptions_count = subscriptions.count('subscriptions.id')
-    i = 0
-    successful = 0
+    subscriptions = Subscription.joins(:next_notification_epsiode).where('episodes.air_date' => Date.today)
     subscriptions.each do |sub|
-      if sub.current_episode_number == sub.number_of_episodes
-        i += 1
-        nt = Notification.create(
-          subscription: sub,
-          message: I18n.t('notifications.season.today', season: sub.season_number, episode: sub.current_episode_number, show: sub.show_ru_name)
-        )
-        if nt.perform
-          nt.update(performed: true)
-          success = true
-          puts "success == INFORM_LOG SEASON #{i+1} (id=#{sub.id})"
-          successful += 1
-        else
-          puts "error == INFORM_LOG SEASON #{i+1} (id=#{sub.id})"
-        end
-      end
+      sub.notify if sub.check
     end
-    puts "RESULT INFORM_LOG SEASON #{successful}/#{i} successful"
+
+    # # episode subscriptions
+    # subscriptions = Subscription.episode.
+    #   select('subscriptions.*, episodes.number AS episode_number, seasons.number AS season_number, shows.name_original AS show_name, shows.name_ru AS show_ru_name').
+    #   joins(episode: [season: [:show]]).where('episodes.air_date' => Date.today)
+    # subscriptions_count = subscriptions.count('subscriptions.id')
+    # successful = 0
+    # subscriptions.each_with_index do |sub, i|
+    #   nt = Notification.create(
+    #     subscription: sub,
+    #     message: I18n.t('notifications.episode.today', season: sub.season_number, episode: sub.episode_number, show: sub.show_ru_name)
+    #   )
+    #   if nt.perform
+    #     nt.update(performed: true)
+    #     success = true
+    #     puts "success == INFORM_LOG EPISODE #{i+1}/#{subscriptions_count} (id=#{sub.id})"
+    #     successful += 1
+    #   else
+    #     puts "error == INFORM_LOG EPISODE #{i+1}/#{subscriptions_count} (id=#{sub.id})"
+    #   end
+    # end
+    # puts "RESULT INFORM_LOG EPISODE #{successful}/#{subscriptions_count} successful"
+
+    # # all new episodes subscriptions
+    # subscriptions = Subscription.new_episodes.
+    #   select('subscriptions.*, episodes.number AS episode_number, seasons.number AS season_number, shows.name_original AS show_name, shows.name_ru AS show_ru_name').
+    #   joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today)
+    # subscriptions_count = subscriptions.count('subscriptions.id')
+    # successful = 0
+    # subscriptions.each_with_index do |sub, i|
+    #   nt = Notification.create(
+    #     subscription: sub,
+    #     message: I18n.t('notifications.new_episodes.today', season: sub.season_number, episode: sub.episode_number, show: sub.show_ru_name)
+    #   )
+    #   if nt.perform
+    #     nt.update(performed: true)
+    #     success = true
+    #     puts "success == INFORM_LOG NEW_EPISODES #{i+1}/#{subscriptions_count} (id=#{sub.id})"
+    #     successful += 1
+    #   else
+    #     puts "error == INFORM_LOG NEW_EPISODES #{i+1}/#{subscriptions_count} (id=#{sub.id})"
+    #   end
+    # end
+    # puts "RESULT INFORM_LOG NEW_EPISODES #{successful}/#{subscriptions_count} successful"
+
+    # # season subscriptions
+    # subscriptions = Subscription.season.
+    #   select('subscriptions.*, seasons.number_of_episodes as number_of_episodes, episodes.number AS current_episode_number, seasons.number AS season_number, shows.name_original AS show_name, shows.name_ru AS show_ru_name').
+    #   joins(show: [seasons: [:episodes]]).where('episodes.air_date' => Date.today)
+    # subscriptions_count = subscriptions.count('subscriptions.id')
+    # i = 0
+    # successful = 0
+    # subscriptions.each do |sub|
+    #   if sub.current_episode_number == sub.number_of_episodes
+    #     i += 1
+    #     nt = Notification.create(
+    #       subscription: sub,
+    #       message: I18n.t('notifications.season.today', season: sub.season_number, episode: sub.current_episode_number, show: sub.show_ru_name)
+    #     )
+    #     if nt.perform
+    #       nt.update(performed: true)
+    #       success = true
+    #       puts "success == INFORM_LOG SEASON #{i+1} (id=#{sub.id})"
+    #       successful += 1
+    #     else
+    #       puts "error == INFORM_LOG SEASON #{i+1} (id=#{sub.id})"
+    #     end
+    #   end
+    # end
+    # puts "RESULT INFORM_LOG SEASON #{successful}/#{i} successful"
   end
 
   task :test => :environment do

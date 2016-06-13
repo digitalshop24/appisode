@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160601153500) do
+ActiveRecord::Schema.define(version: 20160613171427) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -54,6 +54,18 @@ ActiveRecord::Schema.define(version: 20160601153500) do
 
   add_index "episodes", ["season_id"], name: "index_episodes_on_season_id", using: :btree
 
+  create_table "notification_messages", force: :cascade do |t|
+    t.string   "key"
+    t.integer  "show_id"
+    t.string   "message_ru"
+    t.string   "message_en"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "notification_messages", ["key", "show_id"], name: "index_notification_messages_on_key_and_show_id", unique: true, using: :btree
+  add_index "notification_messages", ["show_id"], name: "index_notification_messages_on_show_id", using: :btree
+
   create_table "notifications", force: :cascade do |t|
     t.integer  "subscription_id"
     t.date     "date"
@@ -61,6 +73,7 @@ ActiveRecord::Schema.define(version: 20160601153500) do
     t.datetime "created_at",                      null: false
     t.datetime "updated_at",                      null: false
     t.boolean  "performed",       default: false, null: false
+    t.boolean  "viewed",          default: false, null: false
   end
 
   add_index "notifications", ["subscription_id"], name: "index_notifications_on_subscription_id", using: :btree
@@ -77,31 +90,11 @@ ActiveRecord::Schema.define(version: 20160601153500) do
 
   add_index "seasons", ["show_id"], name: "index_seasons_on_show_id", using: :btree
 
-  create_table "shows", force: :cascade do |t|
-    t.string   "poster"
-    t.boolean  "in_production"
-    t.string   "name"
-    t.string   "russian_name"
-    t.integer  "tmdb_id"
-    t.integer  "number_of_seasons"
-    t.datetime "created_at",                         null: false
-    t.datetime "updated_at",                         null: false
-    t.float    "popularity",        default: 1000.0
-    t.string   "tags",              default: [],     null: false, array: true
-  end
+# Could not dump table "shows" because of following StandardError
+#   Unknown type 'show_status' for column 'status'
 
-  create_table "subscriptions", force: :cascade do |t|
-    t.integer  "show_id"
-    t.integer  "episode_id"
-    t.integer  "subtype"
-    t.integer  "user_id"
-    t.boolean  "active"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  add_index "subscriptions", ["user_id", "show_id"], name: "index_subscriptions_on_user_id_and_show_id", unique: true, using: :btree
-  add_index "subscriptions", ["user_id"], name: "index_subscriptions_on_user_id", using: :btree
+# Could not dump table "subscriptions" because of following StandardError
+#   Unknown type 'subtype' for column 'subtype'
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
@@ -110,10 +103,14 @@ ActiveRecord::Schema.define(version: 20160601153500) do
     t.string   "auth_token",   null: false
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+    t.string   "language"
   end
 
   add_foreign_key "devices", "users"
   add_foreign_key "episodes", "seasons"
+  add_foreign_key "notification_messages", "shows"
   add_foreign_key "notifications", "subscriptions"
   add_foreign_key "seasons", "shows"
+  add_foreign_key "subscriptions", "episodes", column: "next_notification_episode_id"
+  add_foreign_key "subscriptions", "episodes", column: "previous_notification_episode_id"
 end
