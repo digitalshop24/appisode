@@ -8,6 +8,7 @@ end
 class User < ActiveRecord::Base
   has_many :subscriptions, dependent: :destroy
   has_many :devices, dependent: :destroy
+  has_many :notifications, through: :subscriptions
 
   before_save :ensure_auth_token
 

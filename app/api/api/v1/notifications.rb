@@ -36,7 +36,7 @@ module API
           requires :notification_id, type: Integer, desc: 'Id оповещения (это и все предыдущие оповещения пользователя будут прочитаны)'
         end
         post do
-          current_user.notifications.where('id <= ?', params[:notification_id]).update_all(viewed: true)
+          current_user.notifications.where('notifications.id <= ?', params[:notification_id]).update_all(viewed: true)
           present :status, 'ok'
         end
       end
