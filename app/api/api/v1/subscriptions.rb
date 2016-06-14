@@ -28,7 +28,8 @@ module API
           error!(error_message(:auth), 401) unless authenticated
 
           subs = current_user.subscriptions.active.
-            joins(:next_notification_episode, :show).order('episodes.air_date ASC, shows.status ASC').
+            joins('LEFT OUTER JOIN episodes ON subscriptions.next_notification_episode_id=episodes.id', :show).
+            order('episodes.air_date ASC, shows.status ASC').
             preload(:next_notification_episode, show: [:next_episode, :current_season]).
             page(params[:page]).per(params[:per_page])
           present :total, subs.total_count
