@@ -20,6 +20,8 @@ module API
       mount API::V1::Shows
       mount API::V1::Users
       mount API::V1::Subscriptions
+      mount API::V1::Notifications
+      
       add_swagger_documentation(
         api_version: "v1",
         base_path: '/api',

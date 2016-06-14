@@ -21,7 +21,7 @@ module API
       end
 
       resource :notifications, desc: 'Уведомления' do
-        desc "Все уведомления", entity: API::Entities::Notifications
+        desc "Все уведомления", entity: API::Entities::Notification
         params do
           use :pagination
         end
