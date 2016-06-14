@@ -15,5 +15,4 @@ class Notification < ActiveRecord::Base
     JSON.parse(response[:body])['results'].map{ |a| a.first.first }.include?('message_id')
   end
 
-
 end

@@ -30,16 +30,38 @@ module API
           confirmation = rand(1000 .. 9999)
           phone = ::Phone.new(params[:phone])
           error!({ ru: 'Неверный номер', en: 'Invalid phone' }, 406) unless phone.valid?
-          
+
           user = User.where(phone: phone.formatted_phone).first_or_create
-          if params[:show_id]
-            user.subscriptions.create(
-              show_id: params[:show_id],
-              episode_id: params[:episode_id],
-              subtype: params[:subtype],
-              active: false
-            )
+
+          show = Show.find_by_id(params[:show_id])
+          episode = Episode.find_by_id(params[:episode_id]) if params[:episode_id]
+          if ((show && episode) || (show && !params[:episode_id]))
+            if (show.episodes.include?(episode) || !params[:episode_id])
+              subs = user.subscriptions.active.where(
+                show_id: params[:show_id]
+              )
+              if subs.empty?
+                if params[:subtype] == 'episode'
+                  episodes_interval = episode.number - show.next_episode.number
+                  subtype = 'episode'
+                elsif params[:subtype] == 'new_episodes'
+                  episodes_interval = 1
+                  subtype = 'episode'
+                else
+                  episodes_interval = nil
+                  subtype = 'season'
+                end
+                sub = user.subscriptions.create(
+                  show_id: params[:show_id],
+                  subtype: subtype,
+                  episodes_interval: episodes_interval,
+                  next_notification_episode: episode,
+                  active: false
+                )
+              end
+            end
           end
+
           user.update(confirmation: confirmation)
 
           sms = SmsTwilio.new.send(phone.formatted_phone, confirmation)
@@ -63,15 +85,14 @@ module API
           user = User.find_by(phone: params[:phone])
           if user
             if user.confirmation == params[:confirmation]
-              subscriptions = user.subscriptions.where(active: false)
+              subscriptions = user.subscriptions.inactive
               unless subscriptions.empty?
                 subscriptions.last.update(active: true)
               end
 
               present :auth_token, user.auth_token
-              present :subscriptions, user.subscriptions, with: API::Entities::Subscription
+              present :subscriptions, user.subscriptions.active, with: API::Entities::Subscription
             else
-              user.subscriptions.where(active: false).delete_all
               error!({ ru: "Неверный код подтверждения", en: "Wrong confirmation" }, 401)
             end
           else

@@ -28,7 +28,7 @@ puts 'creating users with devices & subscriptions...'
         active: true
       )
     else
-      show = Show.where(in_production: true).order('RANDOM()').limit(1).first
+      show = Show.where(status: 'airing').order('RANDOM()').limit(1).first
       u.subscriptions.create(
         show: show,
         subtype: subtype,

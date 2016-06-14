@@ -130,7 +130,7 @@ module API
         end
         get '/:id/page' do
           user = current_user if authenticated
-          
+
           shows = Show.popular.preload(:next_episode, :current_season)
           shows = shows.get_user_subs(user) if user
           shows = shows.page(params[:page]).per(params[:per_page])

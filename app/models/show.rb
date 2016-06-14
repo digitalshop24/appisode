@@ -3,13 +3,13 @@ class Show < ActiveRecord::Base
   acts_as_taggable_array_on :tags
   has_many :seasons
   has_many :subscriptions
-  has_many :episodes, through: :seasons
+  has_many :episodes, -> { reorder(air_date: :asc, number: :asc) }, through: :seasons
   has_many :upcoming_episodes, -> { where('episodes.air_date > ?', Time.now).order(air_date: :asc) }, through: :seasons, class_name: "Episode", source: :episodes
   has_one :current_season, -> { joins(:episodes).select('seasons.*').where('episodes.air_date > ?', Time.now).order(number: :asc) }, class_name: "Season"
   has_one :last_season, -> { order(number: :desc) }, class_name: "Season"
   has_one :next_episode, through: :current_season
 
-  scope :airing, -> { where('shows.in_production = ? AND episodes.air_date > ?', true, Date.today).
+  scope :airing, -> { where('shows.status = ? AND episodes.air_date > ?', 'airing', Date.today).
                       joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id LEFT OUTER JOIN episodes ON episodes.season_id = seasons.id").
                       distinct }
   scope :popular, -> { airing.order(popularity: :asc) }
@@ -83,7 +83,7 @@ class Show < ActiveRecord::Base
       name_ru: show['name'],
       name_original: show['original_name'],
       poster: Show.image_url(show['poster_path']),
-      in_production: show['in_production']
+      status: 'airing'
     )
     new_show
   end
@@ -94,6 +94,17 @@ class Show < ActiveRecord::Base
       poster: Show.image_url(season['poster_path'])
     )
     new_season
+  end
+
+  def check_status
+    prev_ep = episodes.where('air_date <= ?', Date.today).last
+    unless closed?
+      if airing?
+        hiatus! if !next_episode || next_episode.first?
+      elsif hiatus?
+        airing! if next_episode && !next_episode.first?
+      end
+    end
   end
 
   rails_admin do
@@ -120,12 +131,12 @@ class Show < ActiveRecord::Base
       field :popularity do
         column_width 60
       end
-      field :in_production do
+      field :status do
         column_width 60
       end
     end
     edit do
-      fields :name_original, :name_ru, :name_en, :tmdb_id, :poster, :popularity, :in_production
+      fields :name_original, :name_ru, :name_en, :tmdb_id, :poster, :popularity, :status
       field :tags_field
     end
   end

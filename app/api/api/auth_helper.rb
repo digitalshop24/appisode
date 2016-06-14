@@ -15,7 +15,7 @@ module API
     end
 
     def language
-      headers['Accept-Language'].split(/[\;\-]/).first || (@user.language if @user)
+      (@user.language if @user) || headers['Accept-Language'].split(/[\;\-]/).first
     end
 
   end

@@ -28,7 +28,7 @@ namespace :film_app do
   end
 
   task update: :environment do
-    in_prod_shows = Show.where(in_production: true)
+    in_prod_shows = Show.where(status: %w(airing hiatus))
     in_prod_shows.each_with_index do |show, i|
       puts "#{i}/#{in_prod_shows.count}"
       json = Show.get_json(show.tmdb_id, { language: 'ru' })
@@ -46,19 +46,21 @@ namespace :film_app do
             end
           end
         else
-          season = Show.get_json("#{show.tmdb_id}/season/#{json['seasons'].last['season_number']}", { language: 'ru' })
-          if season
-            new_season = show.create_or_update_season(season)
-            new_episodes = season['episodes'].count - new_season.episodes.count
-            if new_episodes > 0
-              old_episodes = new_season.episodes.where('air_date < ?', Date.today).pluck(:number)
-              season['episodes'].each do |episode|
-                unless episode['episode_number'].in? old_episodes
-                  new_episode = new_season.create_or_update_episode(episode)
+          if json['seasons'].last
+            season = Show.get_json("#{show.tmdb_id}/season/#{json['seasons'].last['season_number']}", { language: 'ru' })
+            if season
+              new_season = show.create_or_update_season(season)
+              new_episodes = season['episodes'].count - new_season.episodes.count
+              if new_episodes > 0
+                old_episodes = new_season.episodes.where('air_date < ?', Date.today).pluck(:number)
+                season['episodes'].each do |episode|
+                  unless episode['episode_number'].in? old_episodes
+                    new_episode = new_season.create_or_update_episode(episode)
+                  end
                 end
               end
+              puts "------ #{Time.now} - season #{new_season.number} for \"#{show.name}\" updated. #{new_episodes} episodes added"
             end
-            puts "------ #{Time.now} - season #{new_season.number} for \"#{show.name}\" updated. #{new_episodes} episodes added"
           end
         end
         puts "--- #{Time.now} - show \"#{show.name}\" updated. #{new_seasons} seasons added"
@@ -93,9 +95,10 @@ namespace :film_app do
   end
 
   task inform: :environment do
-    subscriptions = Subscription.joins(:next_notification_epsiode).where('episodes.air_date' => Date.today)
-    subscriptions.each do |sub|
-      sub.notify if sub.check
+    subscriptions = Subscription.joins(:next_notification_episode).where('episodes.air_date' => Date.today)
+    subscriptions.each_with_index do |sub, i|
+      res = sub.notify if sub.check
+      puts "#{i+1}/#{subscriptions.count}(id=#{sub.id}) #{res}"
     end
 
     # # episode subscriptions

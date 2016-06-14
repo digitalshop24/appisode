@@ -1,7 +1,6 @@
 class Episode < ActiveRecord::Base
   belongs_to :season
   has_one :show, through: :season
-  has_many :subscriptions
   after_save :check_season_episode_number
 
   def days_left

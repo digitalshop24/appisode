@@ -2,10 +2,10 @@ module API
   module Entities
     class Subscription < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID подписки"}
-      expose :episode, if: lambda { |object, options| object.episode },
-        documentation: { type: Episode, desc: "Серия" }, using: API::Entities::Episode
-      expose :show, documentation: { type: ShowPreview, desc: "Сериал" }, using: API::Entities::ShowShort
       expose :subtype, documentation: {type: String, desc: 'Тип подписки' }
+      expose :episodes_interval, documentation: { type: Integer, desc: "Кол-во серий для уведомления" }
+      expose :show, documentation: { type: ShowPreview, desc: "Сериал" }, using: API::Entities::ShowShort
+      expose :next_notification_episode, documentation: { type: Episode, desc: "Следующая серия, о которой надо уведомить" }, using: API::Entities::Episode
     end
   end
 end
@@ -27,11 +27,12 @@ module API
         get do
           error!(error_message(:auth), 401) unless authenticated
 
-          subs = current_user.subscriptions.where(active: true).
-            preload(:episode, show: [:next_episode, :current_season]).
+          subs = current_user.subscriptions.active.
+            joins(:next_notification_episode, :show).order('episodes.air_date ASC, shows.status ASC').
+            preload(:next_notification_episode, show: [:next_episode, :current_season]).
             page(params[:page]).per(params[:per_page])
           present :total, subs.total_count
-          present :items, subs, with: API::Entities::Subscription
+          present :items, subs, with: API::Entities::Subscription, language: language
         end
 
         desc "Подписаться"
@@ -47,17 +48,28 @@ module API
           episode = Episode.find_by_id(params[:episode_id]) if params[:episode_id]
           if ((show && episode) || (show && !params[:episode_id]))
             if (show.episodes.include?(episode) || !params[:episode_id])
-              subs = current_user.subscriptions.where(
+              subs = current_user.subscriptions.active.where(
                 show_id: params[:show_id]
               )
               if subs.empty?
+                if params[:subtype] == 'episode'
+                  episodes_interval = episode.number - show.next_episode.number + 1
+                  subtype = 'episode'
+                elsif params[:subtype] == 'new_episodes'
+                  episodes_interval = 1
+                  subtype = 'episode'
+                else
+                  episodes_interval = nil
+                  subtype = 'season'
+                end
                 sub = current_user.subscriptions.create(
                   show_id: params[:show_id],
-                  episode_id: params[:episode_id],
-                  subtype: params[:subtype],
+                  subtype: subtype,
+                  episodes_interval: episodes_interval,
+                  next_notification_episode: episode,
                   active: true
                 )
-                present sub, with: API::Entities::Subscription
+                present sub, with: API::Entities::Subscription, language: language
               else
                 error!({ ru: "Такая подписка уже существует", en: "Subscription to this show already exists" }, 406)
               end
