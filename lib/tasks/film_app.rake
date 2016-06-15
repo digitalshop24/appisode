@@ -27,12 +27,30 @@ namespace :film_app do
     end
   end
 
+  task :load_name_translation, [:lang] => :environment do |t, args|
+    column_name = "name_#{args[:lang]}"
+    raise Exception.new("no column for this lang in db") unless Show.column_names.include?(column_name)
+    shows = Show.where("shows.#{column_name}" => nil)
+    shows_count = shows.count
+    shows.each_with_index do |show, i|
+      loaded_show = Show.get_json(show.tmdb_id, { language: args[:lang] })
+      if (loaded_show['name'] != show.name_original || loaded_show['original_language'] == args[:lang] || loaded_show['name'] =~ /[\d]+/) && (loaded_show['name'] != show.name_en || loaded_show['original_language'] == 'en')
+        puts("#{column_name}=\"#{show[column_name.to_sym]}\" updated to \"#{loaded_show['name']}\" for show #{i+1}/#{shows_count}(id=#{show.id};name_original=\"#{show.name_original}\")")
+        show[column_name.to_sym] = loaded_show['name']
+      else
+        puts("#{column_name}=\"#{show[column_name.to_sym]}\" NOT updated to \"#{loaded_show['name']}\" for show #{i+1}/#{shows_count}(id=#{show.id};name_original=\"#{show.name_original}\")")
+      end
+      show.save
+    end
+  end
+
   task update: :environment do
     in_prod_shows = Show.where(status: %w(airing hiatus))
     in_prod_shows.each_with_index do |show, i|
       puts "#{i}/#{in_prod_shows.count}"
       json = Show.get_json(show.tmdb_id, { language: 'ru' })
       if json
+        show.closed! if json['in_production'] == false 
         new_seasons = json['seasons'].count - show.seasons.count
         if new_seasons > 0
           (json['seasons'].map{|s| s['season_number']} - show.seasons.pluck(:number)).each do |season_number|

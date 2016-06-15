@@ -1,3 +1,4 @@
+require 'open-uri'
 class Show < ActiveRecord::Base
   searchkick word_start: [:name_original, :name_ru, :name_en]
   acts_as_taggable_array_on :tags
@@ -97,7 +98,6 @@ class Show < ActiveRecord::Base
   end
 
   def check_status
-    prev_ep = episodes.where('air_date <= ?', Date.today).last
     unless closed?
       if airing?
         hiatus! if !next_episode || next_episode.first?
