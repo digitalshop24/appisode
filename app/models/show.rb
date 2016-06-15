@@ -11,9 +11,9 @@ class Show < ActiveRecord::Base
   has_one :next_episode, through: :current_season
   has_one :last_season_episode, through: :current_season
 
-  scope :airing, -> { where('shows.status = ? AND episodes.air_date > ?', 'airing', Date.today).
-                      joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id LEFT OUTER JOIN episodes ON episodes.season_id = seasons.id").
-                      distinct }
+  # scope :airing, -> { where('shows.status = ? AND episodes.air_date > ?', 'airing', Date.today).
+  #                     joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id LEFT OUTER JOIN episodes ON episodes.season_id = seasons.id").
+  #                     distinct }
   scope :popular, -> { airing.order(popularity: :asc) }
   scope :new_shows, -> { popular.where('number_of_seasons < ?', 3) }
   enum status: { airing: 'airing', hiatus: 'hiatus', closed: 'closed' }

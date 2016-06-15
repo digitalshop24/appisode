@@ -1,11 +1,7 @@
 module API
-  module Entities
-    class Subscription < Grape::Entity
-      expose :id, documentation: {type: Integer,  desc: "ID подписки"}
-      expose :subtype, documentation: {type: String, desc: 'Тип подписки' }
-      expose :episodes_interval, documentation: { type: Integer, desc: "Кол-во серий для уведомления" }
+  module Entities    
+    class Subscription < SubscriptionShort
       expose :show, documentation: { type: ShowPreview, desc: "Сериал" }, using: API::Entities::ShowForSubscription
-      expose :next_notification_episode, documentation: { type: Episode, desc: "Следующая серия, о которой надо уведомить" }, using: API::Entities::Episode
     end
   end
 end
