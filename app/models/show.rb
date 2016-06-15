@@ -23,7 +23,7 @@ class Show < ActiveRecord::Base
   end
 
   def name lang = :original
-    self["name_#{lang}".to_sym] || self[:name_original]
+    self["name_#{lang}".to_sym] || self[:name_en] || self[:name_original]
     # self["name_#{lang}".to_sym] || self[:name_ru] || self[:name_original]
   end
 
