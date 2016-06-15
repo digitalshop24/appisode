@@ -9,6 +9,7 @@ class Show < ActiveRecord::Base
   has_one :current_season, -> { joins(:episodes).select('seasons.*').where('episodes.air_date > ?', Time.now).order(number: :asc) }, class_name: "Season"
   has_one :last_season, -> { order(number: :desc) }, class_name: "Season"
   has_one :next_episode, through: :current_season
+  has_one :last_season_episode, through: :current_season
 
   scope :airing, -> { where('shows.status = ? AND episodes.air_date > ?', 'airing', Date.today).
                       joins("LEFT OUTER JOIN seasons ON shows.id = seasons.show_id LEFT OUTER JOIN episodes ON episodes.season_id = seasons.id").

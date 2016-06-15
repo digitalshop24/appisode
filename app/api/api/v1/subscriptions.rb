@@ -4,7 +4,7 @@ module API
       expose :id, documentation: {type: Integer,  desc: "ID подписки"}
       expose :subtype, documentation: {type: String, desc: 'Тип подписки' }
       expose :episodes_interval, documentation: { type: Integer, desc: "Кол-во серий для уведомления" }
-      expose :show, documentation: { type: ShowPreview, desc: "Сериал" }, using: API::Entities::ShowShort
+      expose :show, documentation: { type: ShowPreview, desc: "Сериал" }, using: API::Entities::ShowForSubscription
       expose :next_notification_episode, documentation: { type: Episode, desc: "Следующая серия, о которой надо уведомить" }, using: API::Entities::Episode
     end
   end
@@ -30,7 +30,7 @@ module API
           subs = current_user.subscriptions.active.
             joins('LEFT OUTER JOIN episodes ON subscriptions.next_notification_episode_id=episodes.id', :show).
             order('episodes.air_date ASC, shows.status ASC').
-            preload(:next_notification_episode, show: [:next_episode, :current_season]).
+            preload(:next_notification_episode, show: [:next_episode, :current_season, :last_season_episode]).
             page(params[:page]).per(params[:per_page])
           present :total, subs.total_count
           present :items, subs, with: API::Entities::Subscription, language: language

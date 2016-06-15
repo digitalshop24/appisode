@@ -24,6 +24,9 @@ module API
         s.current_season.number_of_episodes
       end
     end
+    class ShowForSubscription < ShowShort
+      expose :last_season_episode, documentation: { type: Episode, desc: "Последняя серия текущего сезона" }, using: API::Entities::Episode
+    end
     class ShowSearch < ShowShort
       expose :subscription_id, documentation: {type: Integer, desc: "Id подписки" },
       if: lambda{ |instance, options| options[:user] } do |instance, options|

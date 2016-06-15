@@ -34,15 +34,19 @@ module API
           user = User.where(phone: phone.formatted_phone).first_or_create
           user.update(confirmation: confirmation)
 
-          Subscription.subscribe(user, params[:show_id], params[:subtype], params[:episode_id], false)
-
+          sub_info = begin
+            Subscription.subscribe(user, params[:show_id], params[:subtype], params[:episode_id], false) if params[:show_id]
+            '. Подписка сохранена'
+          rescue => error
+            '. Подписка не сохранена'
+          end
           sms = SmsTwilio.new.send(phone.formatted_phone, confirmation)
           info = sms.info
           if sms.status == 'ok'
             present :phone, user.phone
             present :status, 'ok'
             present :en_message, info[:en]
-            present :message, info[:ru]
+            present :message, info[:ru] + sub_info
           else
             error!({ ru: info[:ru], en: info[:en] }, info[:code])
           end
