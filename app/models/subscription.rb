@@ -48,6 +48,19 @@ class Subscription < ActiveRecord::Base
     end
   end
 
+  def self.subscribe user, show_id, subtype = 'episode', episode_id = nil, active = true
+    show = Show.find(show_id)
+    episode = show.episodes.find(episode_id) if episode_id
+    sub = user.subscriptions.where(show: show).first_or_initialize
+    sub.subtype = subtype
+    sub.episodes_interval = (episode ? episode.number - show.next_episode.number + 1 : 1 if sub.episode?)
+    sub.next_notification_episode = sub.episode? ? (episode || show.next_episode) : (show.current_season.episodes.last if show.current_season)
+    sub.previous_notification_episode = nil
+    sub.active = active
+    sub.save
+    sub
+  end
+
   private
   def set_next_notification_episode
     if episode?

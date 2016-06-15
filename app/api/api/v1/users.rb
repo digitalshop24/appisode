@@ -24,7 +24,7 @@ module API
           requires :phone, type: String, desc: 'Телефон'
           optional :show_id, type: Integer, desc: 'ID сериала'
           optional :episode_id, type: Integer, desc: 'ID эпизода'
-          optional :subtype, type: String, desc: 'Тип подписки (episode, new_episodes, season)'
+          optional :subtype, type: String, desc: 'Тип подписки', values: Subscription.subtypes.keys
         end
         post '/register' do
           confirmation = rand(1000 .. 9999)
@@ -32,37 +32,9 @@ module API
           error!({ ru: 'Неверный номер', en: 'Invalid phone' }, 406) unless phone.valid?
 
           user = User.where(phone: phone.formatted_phone).first_or_create
-
-          show = Show.find_by_id(params[:show_id])
-          episode = Episode.find_by_id(params[:episode_id]) if params[:episode_id]
-          if ((show && episode) || (show && !params[:episode_id]))
-            if (show.episodes.include?(episode) || !params[:episode_id])
-              subs = user.subscriptions.active.where(
-                show_id: params[:show_id]
-              )
-              if subs.empty?
-                if params[:subtype] == 'episode'
-                  episodes_interval = episode.number - show.next_episode.number
-                  subtype = 'episode'
-                elsif params[:subtype] == 'new_episodes'
-                  episodes_interval = 1
-                  subtype = 'episode'
-                else
-                  episodes_interval = nil
-                  subtype = 'season'
-                end
-                sub = user.subscriptions.create(
-                  show_id: params[:show_id],
-                  subtype: subtype,
-                  episodes_interval: episodes_interval,
-                  next_notification_episode: episode,
-                  active: false
-                )
-              end
-            end
-          end
-
           user.update(confirmation: confirmation)
+
+          Subscription.subscribe(user, params[:show_id], params[:subtype], params[:episode_id], false)
 
           sms = SmsTwilio.new.send(phone.formatted_phone, confirmation)
           info = sms.info

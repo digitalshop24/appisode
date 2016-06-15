@@ -40,46 +40,14 @@ module API
         params do
           requires :show_id, type: Integer, desc: 'ID сериала'
           optional :episode_id, type: Integer, desc: 'ID эпизода'
-          requires :subtype, type: String, desc: 'Тип подписки (episode, new_episodes, season)'
+          requires :subtype, type: String, desc: 'Тип подписки', values: Subscription.subtypes.keys
         end
         post '/subscribe' do
           error!(error_message(:auth), 401) unless authenticated
 
-          show = Show.find_by_id(params[:show_id])
-          episode = Episode.find_by_id(params[:episode_id]) if params[:episode_id]
-          if ((show && episode) || (show && !params[:episode_id]))
-            if (show.episodes.include?(episode) || !params[:episode_id])
-              subs = current_user.subscriptions.active.where(
-                show_id: params[:show_id]
-              )
-              if subs.empty?
-                if params[:subtype] == 'episode'
-                  episodes_interval = episode.number - show.next_episode.number + 1
-                  subtype = 'episode'
-                elsif params[:subtype] == 'new_episodes'
-                  episodes_interval = 1
-                  subtype = 'episode'
-                else
-                  episodes_interval = nil
-                  subtype = 'season'
-                end
-                sub = current_user.subscriptions.create(
-                  show_id: params[:show_id],
-                  subtype: subtype,
-                  episodes_interval: episodes_interval,
-                  next_notification_episode: episode,
-                  active: true
-                )
-                present sub, with: API::Entities::Subscription, language: language
-              else
-                error!({ ru: "Такая подписка уже существует", en: "Subscription to this show already exists" }, 406)
-              end
-            else
-              error!({ ru: "Серия не из этого сериала", en: "Episode not from this show" }, 406)
-            end
-          else
-            error!({ ru: "Сериал или серия не найдены", en: "Episode or show not found" }, 404)
-          end
+          sub = Subscription.subscribe(current_user, params[:show_id], params[:subtype], params[:episode_id])
+          error!(eng_format_errors(sub.errors)) unless sub.errors.empty?
+          present sub, with: API::Entities::Subscription, language: language
         end
 
         desc "Отписаться"
