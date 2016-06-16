@@ -48,6 +48,7 @@ gem 'acts-as-taggable-array-on', '~> 0.3.0'
 
 group :production do
   gem 'unicorn', '~> 4.9'
+  gem 'rails_12factor'
 end
 
 group :development do
