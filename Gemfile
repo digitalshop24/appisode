@@ -20,6 +20,8 @@ gem 'jbuilder', '~> 1.2'
 gem 'figaro', '~> 1.1', '>= 1.1.1'
 gem 'themoviedb'
 gem 'pg'
+gem 'paperclip', '~> 4.3', '>= 4.3.6'
+gem 'aws-sdk', '< 2.0'
 gem 'sendgrid'
 gem 'whenever', :require => false
 gem 'rack-cors', :require => 'rack/cors'

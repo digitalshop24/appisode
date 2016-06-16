@@ -18,6 +18,20 @@ class Show < ActiveRecord::Base
   scope :new_shows, -> { popular.where('number_of_seasons < ?', 3) }
   enum status: { airing: 'airing', hiatus: 'hiatus', closed: 'closed' }
 
+  has_attached_file :image, styles: { medium: "500x750>", thumb: "100x150>" }
+  validates_attachment_content_type :image, content_type: /\Aimage\/.*\Z/
+
+  has_attached_file :subscription_image, styles: { big: "720x160#", medium: "500x144#", thumb: "250x72#" }
+  validates_attachment_content_type :image, content_type: /\Aimage\/.*\Z/
+
+  def poster_url
+    image? ? image.url(:medium) : poster
+  end
+
+  def subscription_image_url
+    subscription_image? ? subscription_image.url(:medium) : poster_url
+  end
+
   def self.get_user_subs user
     joins("LEFT OUTER JOIN subscriptions ON subscriptions.show_id = shows.id AND subscriptions.user_id = #{user.id}").
       select('shows.*, subscriptions.id as subscription_id')
@@ -116,10 +130,10 @@ class Show < ActiveRecord::Base
     list do
       sort_by :popularity
       field :id do
-        column_width 60
+        column_width 65
       end
       field :tmdb_id do
-        column_width 60
+        column_width 65
       end
       field :poster do
         column_width 110
@@ -131,18 +145,22 @@ class Show < ActiveRecord::Base
       field :name_en
       field :name_ru
       field :number_of_seasons do
-        column_width 60
+        label "seas. #"
+        column_width 40
       end
       field :popularity do
-        column_width 60
+        label "popul."
+        column_width 40
       end
       field :status do
-        column_width 60
+        searchable false
+        column_width 65
       end
     end
     edit do
       fields :name_original, :name_ru, :name_en, :tmdb_id, :poster, :popularity, :status
       field :tags_field
+      fields :image, :subscription_image
     end
   end
 end

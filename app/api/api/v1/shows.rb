@@ -17,7 +17,7 @@ module API
     end
     class ShowShort < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID"}
-      expose :poster, documentation: { type: String, desc: "Постер" }
+      expose :poster_url, documentation: { type: String, desc: "Постер" }, as: :poster
       expose :name, documentation: { type: String, desc: "Название" } do |show, options|
         show.name(options[:language])
       end
@@ -32,6 +32,7 @@ module API
     end
     class ShowForSubscription < ShowShort
       expose :last_season_episode, documentation: { type: Episode, desc: "Последняя серия текущего сезона" }, using: API::Entities::Episode
+      expose :subscription_image_url, documentation: { type: String, desc: "Картинка для подписки" }, as: :subscription_image
     end
     class ShowSearch < ShowShort
       expose :subscription_id, documentation: {type: Integer, desc: "Id подписки" },
