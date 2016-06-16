@@ -108,6 +108,10 @@ class Show < ActiveRecord::Base
     end
   end
 
+  def status_enum
+    Show.statuses
+  end
+
   rails_admin do
     list do
       sort_by :popularity

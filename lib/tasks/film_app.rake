@@ -35,7 +35,7 @@ namespace :film_app do
     shows.each_with_index do |show, i|
       loaded_show = Show.get_json(show.tmdb_id, { language: args[:lang] })
       if loaded_show
-        if (loaded_show['name'] != show.name_original || loaded_show['original_language'] == args[:lang] || loaded_show['name'] =~ /[\d]+/) && (loaded_show['name'] != show.name_en || loaded_show['original_language'] == 'en')
+        if (loaded_show['name'] != show.name_original || loaded_show['original_language'] == args[:lang] || loaded_show['name'] =~ /^[\d]+$/) && (loaded_show['name'] != show.name_en || (loaded_show['original_language'] == 'en' && args[:lang] == 'en'))
           puts("#{column_name}=\"#{show[column_name.to_sym]}\" updated to \"#{loaded_show['name']}\" for show #{i+1}/#{shows_count}(id=#{show.id};name_original=\"#{show.name_original}\")")
           show[column_name.to_sym] = loaded_show['name']
         else
