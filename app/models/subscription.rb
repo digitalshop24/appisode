@@ -45,7 +45,7 @@ class Subscription < ActiveRecord::Base
   def switch_to_next_notification_episode
     if next_ep.air_date <= Date.today
       update(previous_notification_episode: next_ep)
-      ep
+      ep = ''
       if episode?
         ep = if next_ep.last_in_season?
           show.upcoming_episodes.limit(episodes_interval).last
