@@ -27,6 +27,27 @@ namespace :film_app do
     end
   end
 
+  task check_subscriptions: :environment do
+    Subscription.active.each{ |sub| sub.check }
+  end
+
+  task check_numbers: :environment do
+    Show.all.each do |show|
+      seasons = show.seasons
+      if seasons.present?
+        number_of_seasons = seasons.reorder(number: :desc).limit(1).first.number
+        show.update(number_of_seasons: number_of_seasons)
+        seasons.each do |season|
+          episodes = season.episodes
+          if episodes.present?
+            number_of_episodes = episodes.reorder(number: :desc).limit(1).first.number
+            season.update(number_of_episodes: number_of_episodes)
+          end
+        end
+      end
+    end
+  end
+
   task :load_name_translation, [:lang] => :environment do |t, args|
     column_name = "name_#{args[:lang]}"
     raise Exception.new("no column for this lang in db") unless Show.column_names.include?(column_name)

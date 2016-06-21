@@ -18,7 +18,7 @@ class Episode < ActiveRecord::Base
   private
   def check_season_episode_number
     if season
-      number_of_episodes = season.episodes.order(number: :desc).limit(1).first.number
+      number_of_episodes = season.episodes.reorder(number: :desc).limit(1).first.number
       season.update(number_of_episodes: number_of_episodes)
     end
   end

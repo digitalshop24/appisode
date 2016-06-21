@@ -128,7 +128,7 @@ module API
           options = if params[:push_type] == 'notification'
             { notification: { body: message, title: 'Appisode', icon: icon } }
           else
-            { data: { message: message, path: icon }, collapse_key: "updated_score"}
+            { data: { message: message, path: icon }, collapse_key: "#{(1..10).map{('a'..'z').to_a.sample}.join}"}
           end
           response = gcm.send(registration_ids, options)
           if JSON.parse(response[:body])['results'].map{ |a| a.first.first }.include?('message_id')

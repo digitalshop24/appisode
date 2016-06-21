@@ -17,7 +17,7 @@ class Season < ActiveRecord::Base
   private
   def check_show_season_number
     if show
-      number_of_seasons = show.seasons.order(number: :desc).limit(1).first.number
+      number_of_seasons = show.seasons.reorder(number: :desc).limit(1).first.number
       show.update(number_of_seasons: number_of_seasons)
     end
   end
