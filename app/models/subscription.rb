@@ -21,7 +21,7 @@ class Subscription < ActiveRecord::Base
       upeps = upeps.where(season: next_ep.season) if next_ep
       upeps.limit(episodes_interval).last
     else
-      show.current_season.episodes.last if show.current_season
+      show.current_season.upcoming_episodes.last if show.current_season
     end
     update(next_notification_episode: ep)
   end
@@ -53,7 +53,7 @@ class Subscription < ActiveRecord::Base
           show.upcoming_episodes.where(season: next_ep.season).limit(episodes_interval).last
         end
       else
-        ep = show.current_season.episodes.last if show.current_season
+        ep = show.current_season.upcoming_episodes.last if show.current_season
       end
       update(next_notification_episode: ep)
     end
