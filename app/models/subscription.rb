@@ -12,14 +12,17 @@ class Subscription < ActiveRecord::Base
   alias_method :prev_ep, :previous_notification_episode
 
   before_create :set_next_notification_episode
-  after_save :check_show_status
 
   validates_uniqueness_of :user_id, scope: [:show_id]
 
   def update_next_ep
-    upeps = show.upcoming_episodes
-    upeps = upeps.where(season: next_ep.season) if next_ep
-    ep = upeps.limit(episodes_interval).last
+    ep = if episode?
+      upeps = show.upcoming_episodes
+      upeps = upeps.where(season: next_ep.season) if next_ep
+      upeps.limit(episodes_interval).last
+    else
+      show.current_season.episodes.last if show.current_season
+    end
     update(next_notification_episode: ep)
   end
 
@@ -32,19 +35,25 @@ class Subscription < ActiveRecord::Base
 
   def notify
     nt = Notification.create(subscription: self, message: notification_message)
-    if nt.perform
-      nt.update(performed: true)
-      switch_to_next_notification_episode
-    end
+    # if nt.perform
+    nt.perform
+    nt.update(performed: true)
+    switch_to_next_notification_episode
+    # end
   end
 
   def switch_to_next_notification_episode
     if next_ep.air_date <= Date.today
       update(previous_notification_episode: next_ep)
-      ep = if next_ep.last_in_season?
-        show.upcoming_episodes.limit(episodes_interval).last
+      ep
+      if episode?
+        ep = if next_ep.last_in_season?
+          show.upcoming_episodes.limit(episodes_interval).last
+        else
+          show.upcoming_episodes.where(season: next_ep.season).limit(episodes_interval).last
+        end
       else
-        show.upcoming_episodes.where(season: next_ep.season).limit(episodes_interval).last
+        ep = show.current_season.episodes.last if show.current_season
       end
       update(next_notification_episode: ep)
     end
@@ -71,10 +80,6 @@ class Subscription < ActiveRecord::Base
         self.next_notification_episode = show.upcoming_episodes.limit(episodes_interval).last
       end
     end
-  end
-
-  def check_show_status
-    show.check_status
   end
 
   def get_replacement word

@@ -48,6 +48,13 @@ namespace :film_app do
     end
   end
 
+  task check_show_statuses: :environment do
+    Show.where(status: %w(airing hiatus)).each do |show|
+      show.check_status
+    end
+  end
+
+
   task :load_name_translation, [:lang] => :environment do |t, args|
     column_name = "name_#{args[:lang]}"
     raise Exception.new("no column for this lang in db") unless Show.column_names.include?(column_name)
