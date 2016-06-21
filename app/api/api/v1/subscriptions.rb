@@ -1,7 +1,7 @@
 module API
   module Entities    
     class Subscription < SubscriptionShort
-      expose :show, documentation: { type: ShowPreview, desc: "Сериал" }, using: API::Entities::ShowForSubscription
+      expose :show, documentation: { type: ShowForSubscription, desc: "Сериал" }, using: API::Entities::ShowForSubscription
     end
   end
 end
