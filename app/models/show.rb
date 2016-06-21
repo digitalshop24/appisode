@@ -5,8 +5,7 @@ class Show < ActiveRecord::Base
   has_many :seasons
   has_many :subscriptions
   has_many :episodes, -> { reorder(air_date: :asc, number: :asc) }, through: :seasons
-  has_many :upcoming_episodes, -> { where('episodes.air_date > ?', Time.now).order(air_date: :asc) }, through: :seasons, class_name: "Episode", source: :episodes
-  has_many :known_upcoming_episodes, -> { where('episodes.air_date > ?', Time.now).order(air_date: :asc) }, through: :seasons, class_name: "Episode", source: :episodes
+  has_many :upcoming_episodes, -> { where('episodes.air_date > ?', Time.now).order(number: :asc) }, through: :seasons, class_name: "Episode", source: :episodes
   has_one :current_season, -> { joins(:episodes).select('seasons.*').where('episodes.air_date > ?', Time.now).order(number: :asc) }, class_name: "Season"
   has_one :last_season, -> { order(number: :desc) }, class_name: "Season"
   has_one :next_episode, through: :current_season
