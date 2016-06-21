@@ -17,7 +17,9 @@ class Subscription < ActiveRecord::Base
   validates_uniqueness_of :user_id, scope: [:show_id]
 
   def update_next_ep
-    ep = show.upcoming_episodes.where(season: next_ep.season).limit(episodes_interval).last
+    upeps = show.upcoming_episodes
+    upeps = upeps.where(season: next_ep.season) if next_ep
+    ep = upeps.limit(episodes_interval).last
     update(next_notification_episode: ep)
   end
 

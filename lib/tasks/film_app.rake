@@ -32,7 +32,7 @@ namespace :film_app do
   end
 
   task check_numbers: :environment do
-    Show.all.each do |show|
+    Show.order(popularity: :asc).each do |show|
       seasons = show.seasons
       if seasons.present?
         number_of_seasons = seasons.reorder(number: :desc).limit(1).first.number
