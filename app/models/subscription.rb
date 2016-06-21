@@ -22,10 +22,10 @@ class Subscription < ActiveRecord::Base
   end
 
   def check
-    if (prev_ep && next_ep.number - prev_ep.number != episodes_interval) || subtype == 'season'
-      update_next_ep unless next_ep.last_in_season?
+    if !next_ep || subtype == 'season' || (prev_ep && next_ep.number - prev_ep.number != episodes_interval)
+      update_next_ep if !next_ep || !next_ep.last_in_season?
     end
-    next_ep.air_date == Date.today
+    next_ep.air_date == Date.today if next_ep
   end
 
   def notify
