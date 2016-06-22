@@ -53,12 +53,11 @@ namespace :film_app do
           show.trakt_id = trakt_show['show']['ids']['trakt']
           imdb_id ||= trakt_show['show']['ids']['imdb']
           tvdb_id ||= trakt_show['show']['ids']['tvdb']
-          tvdb_id ||= trakt_show['show']['ids']['tvrage']        
+          tvdb_id ||= trakt_show['show']['ids']['tvrage']
         end
         show.imdb_id ||= imdb_id
         show.tvdb_id ||= tvdb_id
         show.tvrage_id ||= tvrage_id
-        show.save
 
         tvmaze = Tvmaze.new
         tvmaze_show = tvmaze.get(show.tvmaze_id) if show.tvmaze_id
@@ -71,8 +70,8 @@ namespace :film_app do
           show.imdb_id ||= tvmaze_show['externals']['imdb']
           show.tvdb_id ||= tvmaze_show['externals']['thetvdb']
           show.tvrage_id ||= tvmaze_show['externals']['tvrage']
-          show.save          
         end
+        show.save
         puts "Show with tmdb_id=#{show.tmdb_id} not found!" if !tvmaze_show && !trakt_show
       else
         puts "No tmdb_id for show with id #{show.id}"
