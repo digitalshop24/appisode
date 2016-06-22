@@ -72,7 +72,10 @@ namespace :film_app do
           show.tvrage_id ||= tvmaze_show['externals']['tvrage']
         end
         show.save if show.changed?
-        puts "Show with tmdb_id=#{show.tmdb_id} not found!" if !tvmaze_show && !trakt_show
+        if !tvmaze_show && !trakt_show
+          puts "Show with tmdb_id=#{show.tmdb_id} not found!"
+          j += 1
+        end
       else
         puts "No tmdb_id for show with id #{show.id}"
       end
