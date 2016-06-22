@@ -23,12 +23,13 @@ module API
       resource :notifications, desc: 'Уведомления' do
         desc "Все уведомления", entity: API::Entities::Notification
         params do
-          use :pagination
+          optional :skip, type: Integer, desc: 'Пропустить'
+          optional :take, type: Integer, desc: 'Взять'
         end
         get do
-          nots = current_user.notifications.not_viewed.page(params[:page]).per(params[:per_page])
-          present :total, nots.total_count
-          present :shows, nots, with: API::Entities::Notification
+          nots = current_user.notifications.not_viewed
+          present :total, nots.count
+          present :shows, nots.offset(params[:skip] || 0).limit(params[:take] || 6), with: API::Entities::Notification
         end
 
         desc "Прочитать оповещения"
