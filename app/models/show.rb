@@ -22,7 +22,7 @@ class Show < ActiveRecord::Base
   validates_attachment_content_type :image, content_type: /\Aimage\/.*\Z/
 
   has_attached_file :subscription_image, styles: { big: "720x160#", medium: "500x144#", thumb: "250x72#" }
-  validates_attachment_content_type :image, content_type: /\Aimage\/.*\Z/
+  validates_attachment_content_type :subscription_image, content_type: /\Aimage\/.*\Z/
 
   def poster_url
     image? ? image.url(:medium) : poster

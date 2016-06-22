@@ -32,6 +32,7 @@ gem 'devise', '~> 4.1', '>= 4.1.1'
 gem 'rails_admin', '~> 0.8.1'
 gem 'kaminari', '~> 0.17.0'
 gem 'tag-it-rails', '~> 2.0'
+gem 'trakt_api', git: 'https://github.com/honeybee-it/trakt_api.git'
 
 gem 'wysiwyg-rails'
 gem 'icheck-rails'

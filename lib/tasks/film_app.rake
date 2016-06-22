@@ -27,6 +27,60 @@ namespace :film_app do
     end
   end
 
+  task load_ids: :environment do
+    tc = TraktApi::Client.new(api_key: ENV['TRAKT_CLIENT_ID'])
+    shows = Show.where('shows.tvdb_id IS NULL OR shows.imdb_id IS NULL OR shows.trakt_id IS NULL OR shows.tvrage_id IS NULL OR shows.tvmaze_id IS NULL')
+    count = shows.count
+    j = 0
+    shows.each_with_index do |show, i|
+      if show.tmdb_id
+        tmdb_show_ids = Show.get_json("#{show.tmdb_id}/external_ids")
+        if !tmdb_show_ids
+          puts "Show with tmdb_id=#{show.tmdb_id} DOES NOT EXISTS"
+          next
+        end
+        imdb_id = tmdb_show_ids['imdb_id']
+        tvdb_id = tmdb_show_ids['tvdb_id']
+        tvrage_id = tmdb_show_ids['tvrage_id']
+
+        trakt_show = tc.search.call(id_type: 'tmdb', id: show.tmdb_id).body.select{ |s| s['type'] == 'show' }.first
+        trakt_show = tc.search.call(id_type: 'imdb', id: imdb_id).body.select{ |s| s['type'] == 'show' }.first if !trakt_show && imdb_id
+        trakt_show = tc.search.call(id_type: 'tvdb', id: tvdb_id).body.select{ |s| s['type'] == 'show' }.first if !trakt_show && tvdb_id
+        trakt_show = tc.search.call(id_type: 'tvrage', id: tvrage_id).body.select{ |s| s['type'] == 'show' }.first if !trakt_show && tvrage_id
+
+        if trakt_show
+          show.status = 'closed' if trakt_show['show']['status'] == 'ended'
+          show.trakt_id = trakt_show['show']['ids']['trakt']
+          imdb_id ||= trakt_show['show']['ids']['imdb']
+          tvdb_id ||= trakt_show['show']['ids']['tvdb']
+          tvdb_id ||= trakt_show['show']['ids']['tvrage']        
+        end
+        show.imdb_id ||= imdb_id
+        show.tvdb_id ||= tvdb_id
+        show.tvrage_id ||= tvrage_id
+        show.save
+
+        tvmaze = Tvmaze.new
+        tvmaze_show = tvmaze.get(show.tvmaze_id) if show.tvmaze_id
+        tvmaze_show ||= tvmaze.lookup('tvdb', show.tvdb_id) if show.tvdb_id
+        tvmaze_show ||= tvmaze.lookup('imdb', show.imdb_id) if show.imdb_id
+        tvmaze_show ||= tvmaze.lookup('tvrage', show.tvrage_id) if show.tvrage_id
+        if tvmaze_show
+          show.status = 'closed' if tvmaze_show['status'] == 'Ended'
+          show.tvmaze_id = tvmaze_show['id']
+          show.imdb_id ||= tvmaze_show['externals']['imdb']
+          show.tvdb_id ||= tvmaze_show['externals']['thetvdb']
+          show.tvrage_id ||= tvmaze_show['externals']['tvrage']
+          show.save          
+        end
+        puts "Show with tmdb_id=#{show.tmdb_id} not found!" if !tvmaze_show && !trakt_show
+      else
+        puts "No tmdb_id for show with id #{show.id}"
+      end
+      puts "#{i+1}/#{count} done. #{j} shows not found."
+    end
+  end
+
   task check_subscriptions: :environment do
     Subscription.active.each{ |sub| sub.check }
   end
