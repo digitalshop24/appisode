@@ -7,6 +7,12 @@ class Episode < ActiveRecord::Base
     (air_date - Date.today).to_i
   end
 
+
+  def hours_left
+    air = air_stamp || (air_date.end_of_day if air_date) || Time.now
+    ((air - Time.now) / 1.hour).round
+  end
+
   def last_in_season?
     number == season.number_of_episodes
   end
