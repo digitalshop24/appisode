@@ -41,7 +41,7 @@ namespace :film_app do
           puts "Show with tmdb_id=#{show.tmdb_id} DOES NOT EXISTS"
           next
         end
-        imdb_id = tmdb_show_ids['imdb_id']
+        imdb_id = tmdb_show_ids['imdb_id'] if tmdb_show_ids['imdb_id'].present?
         tvdb_id = tmdb_show_ids['tvdb_id']
         tvrage_id = tmdb_show_ids['tvrage_id']
 
@@ -58,7 +58,7 @@ namespace :film_app do
         if trakt_show
           show.status = 'closed' if trakt_show['show']['status'] == 'ended'
           show.trakt_id = trakt_show['show']['ids']['trakt']
-          imdb_id ||= trakt_show['show']['ids']['imdb']
+          imdb_id ||= trakt_show['show']['ids']['imdb'] if trakt_show['show']['ids']['imdb'].present?
           tvdb_id ||= trakt_show['show']['ids']['tvdb']
           tvdb_id ||= trakt_show['show']['ids']['tvrage']
         end
@@ -74,7 +74,7 @@ namespace :film_app do
         if tvmaze_show
           show.status = 'closed' if tvmaze_show['status'] == 'Ended'
           show.tvmaze_id = tvmaze_show['id']
-          show.imdb_id ||= tvmaze_show['externals']['imdb']
+          show.imdb_id ||= tvmaze_show['externals']['imdb'] if tvmaze_show['externals']['imdb'].present?
           show.tvdb_id ||= tvmaze_show['externals']['thetvdb']
           show.tvrage_id ||= tvmaze_show['externals']['tvrage']
         end
@@ -183,6 +183,36 @@ namespace :film_app do
           end
         end
         puts "--- #{Time.now} - show \"#{show.name}\" updated. #{new_seasons} seasons added"
+      end
+    end
+  end
+
+  task tvmaze_check_updates: :environment do |t, args|
+    tvmaze = Tvmaze.new
+    tvmaze_ids = tvmaze.updates(1).keys
+    tvmaze_ids.each_with_index do |tvmaze_id|
+      show = Show.find_by(tvmaze_id: tvmaze_id)
+      if show
+        episodes_updated = 0
+        episodes = tvmaze.episodes(tvmaze_id).select do |e|
+          time = Time.parse(e['airstamp']) if e['airstamp'].present?
+          time ||= Date.parse(e['airsdate']) if e['airsdate'].present?
+          (time >= Time.now if time) || !time
+        end
+        episodes.each do |ep|
+          season = show.seasons.where(number: ep['season']).first_or_create
+          episode = season.episodes.where(number: ep['number']).first_or_initialize do
+            air_date = Date.parse(ep['airdate']) if ep['airdate'].present?
+            air_stamp = Time.parse(ep['airstamp']) if ep['airstamp'].present?
+          end
+          if episode.changed?
+            episode.save
+            episodes_updated += 1
+          end
+        end
+        puts "Show \"#{show.name}\"(id=#{show.id}): #{episodes_updated} episodes updated" 
+      else
+        puts "Show with tvmaze_id=#{tvmaze_id} not found"
       end
     end
   end

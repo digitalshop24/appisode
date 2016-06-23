@@ -4,12 +4,30 @@ class Tvmaze
     @conn = Faraday.new(url: @api_path)
   end
 
-  def get tvmaze_id, type = "shows"
+  def get tvmaze_id
     raise Exception.new("tvmaze_id cant be nil") unless tvmaze_id
     res = @conn.get do |req|
-      req.url "#{type}/#{tvmaze_id}"
+      req.url "shows/#{tvmaze_id}"
     end
     JSON.parse(res.body)
+  end
+
+  def episodes tvmaze_id
+    res = @conn.get do |req|
+      req.url "shows/#{tvmaze_id}/episodes"
+    end
+    JSON.parse(res.body)
+  end
+
+  def updates days = nil
+    res = @conn.get do |req|
+      req.url "updates/shows"
+    end
+    json = JSON.parse(res.body)
+    if days
+      json = json.select { |k,v| Time.at(v) > Date.today - days.day }
+    end
+    json
   end
 
   def lookup api, id
