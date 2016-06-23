@@ -43,10 +43,14 @@ namespace :film_app do
         tvdb_id = tmdb_show_ids['tvdb_id']
         tvrage_id = tmdb_show_ids['tvrage_id']
 
-        trakt_show = tc.search.call(id_type: 'tmdb', id: show.tmdb_id).body.to_a.select{ |s| s['type'] == 'show' }.first
-        trakt_show = tc.search.call(id_type: 'imdb', id: imdb_id).body.to_a.select{ |s| s['type'] == 'show' }.first if !trakt_show && imdb_id
-        trakt_show = tc.search.call(id_type: 'tvdb', id: tvdb_id).body.to_a.select{ |s| s['type'] == 'show' }.first if !trakt_show && tvdb_id
-        trakt_show = tc.search.call(id_type: 'tvrage', id: tvrage_id).body.to_a.select{ |s| s['type'] == 'show' }.first if !trakt_show && tvrage_id
+        begin
+          trakt_show = tc.search.call(id_type: 'tmdb', id: show.tmdb_id).body.select{ |s| s['type'] == 'show' }.first
+          trakt_show = tc.search.call(id_type: 'imdb', id: imdb_id).body.select{ |s| s['type'] == 'show' }.first if !trakt_show && imdb_id
+          trakt_show = tc.search.call(id_type: 'tvdb', id: tvdb_id).body.select{ |s| s['type'] == 'show' }.first if !trakt_show && tvdb_id
+          trakt_show = tc.search.call(id_type: 'tvrage', id: tvrage_id).body.select{ |s| s['type'] == 'show' }.first if !trakt_show && tvrage_id
+        rescue => error
+          puts "ERROR while getting info from TRAKT.TV #{error.message}"
+        end
 
         if trakt_show
           show.status = 'closed' if trakt_show['show']['status'] == 'ended'
