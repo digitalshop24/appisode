@@ -32,8 +32,10 @@ namespace :film_app do
     shows = Show.where('shows.tvdb_id IS NULL OR shows.imdb_id IS NULL OR shows.trakt_id IS NULL OR shows.tvrage_id IS NULL OR shows.tvmaze_id IS NULL')
     count = shows.count
     j = 0
+    errors = []
     shows.each_with_index do |show, i|
       if show.tmdb_id
+        puts "show id=#{show.id}"
         tmdb_show_ids = Show.get_json("#{show.tmdb_id}/external_ids")
         if !tmdb_show_ids
           puts "Show with tmdb_id=#{show.tmdb_id} DOES NOT EXISTS"
@@ -49,7 +51,8 @@ namespace :film_app do
           trakt_show = tc.search.call(id_type: 'tvdb', id: tvdb_id).body.select{ |s| s['type'] == 'show' }.first if !trakt_show && tvdb_id
           trakt_show = tc.search.call(id_type: 'tvrage', id: tvrage_id).body.select{ |s| s['type'] == 'show' }.first if !trakt_show && tvrage_id
         rescue => error
-          puts "ERROR while getting info from TRAKT.TV #{error.message}"
+          puts "ERROR while getting info from TRAKT.TV show(id=#{show.id}): #{error.message}"
+          errors << { show_id: show.id, error_type: 'trakt.tv', error_message: error.message }
         end
 
         if trakt_show
@@ -75,7 +78,12 @@ namespace :film_app do
           show.tvdb_id ||= tvmaze_show['externals']['thetvdb']
           show.tvrage_id ||= tvmaze_show['externals']['tvrage']
         end
-        show.save if show.changed?
+        begin
+          show.save if show.changed?
+        rescue => error
+          puts "ERROR while saving show(id=#{show.id}): #{error.message}"
+          errors << { show_id: show.id, error_type: 'saving', error_message: error.message }
+        end
         if !tvmaze_show && !trakt_show
           puts "Show with tmdb_id=#{show.tmdb_id} not found!"
           j += 1
@@ -85,6 +93,7 @@ namespace :film_app do
       end
       puts "#{i+1}/#{count} done. #{j} shows not found."
     end
+    puts errors
   end
 
   task check_subscriptions: :environment do
