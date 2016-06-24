@@ -8,6 +8,7 @@ module API
         e.air_date < Time.now
       end
       expose :days_left, documentation: {type: Integer, desc: 'Дней до выхода серии'}
+      expose :hours_left, documentation: { type: Integer, desc: 'Часов до выхода серии' }
     end
     class SubscriptionShort < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID подписки"}

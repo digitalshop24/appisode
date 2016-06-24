@@ -3,6 +3,9 @@ module API
     class Notification < Grape::Entity
       expose :id, documentation: {type: Integer,  desc: "ID уведомления"}
       expose :message, documentation: {type: String,  desc: "Текст"}
+      expose :image, documentation: {type: String, desc: "Картинка" } do |_|
+        "http://cdn01.cdn.justjared.com/wp-content/uploads/headlines/2014/01/breaking-bad-sag-awards-2014.jpg"
+      end
     end
   end
 end
