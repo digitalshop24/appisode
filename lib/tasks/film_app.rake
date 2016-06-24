@@ -187,9 +187,10 @@ namespace :film_app do
     end
   end
 
-  task tvmaze_check_updates: :environment do |t, args|
+  task :tvmaze_check_updates, [:days] => :environment do |t, args|
+    days = (args[:days].to_i if args[:days]) || 1
     tvmaze = Tvmaze.new
-    tvmaze_ids = tvmaze.updates(1).keys
+    tvmaze_ids = tvmaze.updates(days).keys
     tvmaze_ids.each_with_index do |tvmaze_id|
       show = Show.find_by(tvmaze_id: tvmaze_id)
       if show
