@@ -97,7 +97,7 @@ namespace :film_app do
   end
 
   task check_subscriptions: :environment do
-    Subscription.active.each{ |sub| sub.check }
+    Subscription.active.each{ |sub| sub.update_next_ep if !sub.next_ep || sub.next_ep.air_date < Date.today }
   end
 
   task check_numbers: :environment do
