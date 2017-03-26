@@ -6,6 +6,9 @@ module API
       expose :image, documentation: {type: String, desc: "Картинка" } do |_|
         "http://cdn01.cdn.justjared.com/wp-content/uploads/headlines/2014/01/breaking-bad-sag-awards-2014.jpg"
       end
+      expose :show_id, documentation: { type: Integer, desc: 'ID сериала' } do |n|
+        n.subscribtion&.show_id
+      end
     end
   end
 end
@@ -30,7 +33,7 @@ module API
           optional :take, type: Integer, desc: 'Взять'
         end
         get do
-          nots = current_user.notifications.not_viewed
+          nots = current_user.notifications.not_viewed.includes(:subscription)
           present :total, nots.count
           present :shows, nots.offset(params[:skip] || 0).limit(params[:take] || 6), with: API::Entities::Notification
         end
