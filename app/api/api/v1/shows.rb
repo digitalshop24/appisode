@@ -5,7 +5,7 @@ module API
       expose :number, documentation: {type: Integer,  desc: "Номер серии"}
       expose :air_date, documentation: {type: Integer,  desc: "Дата выхода серии"}
       expose :aired, documentation: {type: 'Boolean', desc: 'Вышел ли уже'} do |e|
-        e.air_date < Time.now
+        e.air_date.present? && e.air_date < Time.now
       end
       expose :days_left, documentation: {type: Integer, desc: 'Дней до выхода серии'}
       expose :hours_left, documentation: { type: Integer, desc: 'Часов до выхода серии' }

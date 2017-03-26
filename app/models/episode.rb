@@ -4,11 +4,12 @@ class Episode < ActiveRecord::Base
   after_save :check_season_episode_number
 
   def days_left
-    (air_date - Date.today).to_i
+    (air_date - Date.today).to_i if air_date.present?
   end
 
 
   def hours_left
+    return unless air_date.present?
     air = air_stamp || (air_date.end_of_day if air_date) || Time.now
     ((air - Time.now) / 1.hour).round
   end
