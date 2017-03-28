@@ -7,7 +7,7 @@ module API
         "http://cdn01.cdn.justjared.com/wp-content/uploads/headlines/2014/01/breaking-bad-sag-awards-2014.jpg"
       end
       expose :show_id, documentation: { type: Integer, desc: 'ID сериала' } do |n|
-        n.subscribtion&.show_id
+        n.subscription&.show_id
       end
     end
   end
